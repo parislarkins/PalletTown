@@ -14,17 +14,17 @@ import java.util.regex.Pattern;
  */
 public class Pikaptcha {
 
-    private static String plusMail;
-    private static String userName;
-    private static String password;
-    private static Integer startNum;
-    private static int count;
-    private static String captchaKey;
-    private static boolean autoVerify;
-    private static String gmail;
-    private static String gmailPass;
-    private static boolean acceptTos;
-    private static File outputFile;
+    public static String plusMail;
+    public static String userName;
+    public static String password;
+    public static Integer startNum;
+    public static int count;
+    public static String captchaKey;
+    public static boolean autoVerify;
+    public static String gmail;
+    public static String gmailPass;
+    public static boolean acceptTos;
+    public static File outputFile;
 
     public static void Start(){
         parseArgs();
@@ -66,30 +66,9 @@ public class Pikaptcha {
 
         System.out.println("Starting");
 
+        AccountCreator.createAccounts(userName,password,plusMail,captchaKey);
         for (int i = 0; i < count; i++) {
-            System.out.println("Making account #" + (i+1));
 
-            String accUser;
-
-            if(count > 1 && startNum == null)
-                accUser = userName + (i+1);
-            else if (count >= 1 && startNum != null)
-                accUser = userName + (startNum + i);
-            else
-                accUser = userName;
-
-            String accMail = plusMail.replace("@","+" + accUser + "@");
-            AccountCreator.createAccount(accUser,password,accMail,captchaKey);
-
-            System.out.println("  Username: " + accUser);
-            outputAppend(accUser+":"+password);
-            System.out.println("  Password: " + password);
-            System.out.println("  Email   : " + accMail);
-
-            if(acceptTos)
-                TOSAccept.acceptTos(accUser,password,accMail);
-            else
-                System.out.println("Skipping TOS acceptance");
 
 //            String append = accUser+":"+password + "\n";
 //            System.out.println("Appending: ");
@@ -113,7 +92,7 @@ public class Pikaptcha {
 
     }
 
-    private static void outputAppend(String s) {
+    static void outputAppend(String s) {
         // append to end of file
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile,true))) {
             bw.write(s);
