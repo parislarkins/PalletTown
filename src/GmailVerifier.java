@@ -9,10 +9,6 @@ import java.util.Properties;
 
 public class GmailVerifier {
 
-    public static void main(String[] args) {
-        verify("miminpari@gmail.com","mynovskeybringsem9");
-    }
-
     static Properties mailServerProperties = new Properties();
     static Session getMailSession;
 
