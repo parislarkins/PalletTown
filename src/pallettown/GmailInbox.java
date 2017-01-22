@@ -1,4 +1,4 @@
-package pikaptchagui;
+package pallettown;
 
 import javax.mail.*;
 import java.io.BufferedReader;

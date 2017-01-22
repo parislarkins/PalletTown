@@ -1,4 +1,4 @@
-package pikaptchagui;
+package pallettown;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -39,7 +39,7 @@ public class GUI extends Application{
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
-        primaryStage.setTitle("Pikaptcha GUI");
+        primaryStage.setTitle("PalletTown GUI");
         Scene scene = new Scene(root);
 
 
@@ -401,7 +401,7 @@ public class GUI extends Application{
         });
 
         Button submit = new Button("Create accounts");
-        submit.setOnAction(event -> Pikaptcha.Start());
+        submit.setOnAction(event -> PalletTown.Start());
         vb.getChildren().add(submit);
 
         CheckBox debug = new CheckBox("Debug Mode");

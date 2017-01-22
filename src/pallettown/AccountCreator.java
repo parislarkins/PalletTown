@@ -1,4 +1,4 @@
-package pikaptchagui;
+package pallettown;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -30,7 +30,7 @@ public class AccountCreator implements Runnable{
         plusMail = plus;
         captchaKey = captcha;
 
-        WORK_ITEMS = Pikaptcha.count;
+        WORK_ITEMS = PalletTown.count;
 
         AccountCreator accCreator = new AccountCreator();
         Thread[] threads = new Thread[THREADS];
@@ -51,7 +51,7 @@ public class AccountCreator implements Runnable{
             e.printStackTrace();
         }
 //
-//        for (int i = 0; i < Pikaptcha.count; i++) {
+//        for (int i = 0; i < PalletTown.count; i++) {
 //            createAccount(i);
 //        }
         System.out.println("done");
@@ -87,23 +87,23 @@ public class AccountCreator implements Runnable{
 
         String accUser;
 
-        if(Pikaptcha.count > 1 && Pikaptcha.startNum == null)
-            accUser = Pikaptcha.userName + (accNum+1);
-        else if (Pikaptcha.count >= 1 && Pikaptcha.startNum != null)
-            accUser = Pikaptcha.userName + (Pikaptcha.startNum + accNum);
+        if(PalletTown.count > 1 && PalletTown.startNum == null)
+            accUser = PalletTown.userName + (accNum+1);
+        else if (PalletTown.count >= 1 && PalletTown.startNum != null)
+            accUser = PalletTown.userName + (PalletTown.startNum + accNum);
         else
-            accUser = Pikaptcha.userName;
+            accUser = PalletTown.userName;
 
         String accMail = plusMail.replace("@","+" + accUser + "@");
 
         System.out.println("  Username: " + accUser);
-        Pikaptcha.outputAppend(accUser+":"+password);
+        PalletTown.outputAppend(accUser+":"+password);
         System.out.println("  Password: " + password);
         System.out.println("  Email   : " + accMail);
 
         createAccPy(accUser,password,accMail,birthday, captchaKey);
 
-        if(Pikaptcha.acceptTos)
+        if(PalletTown.acceptTos)
             TOSAccept.acceptTos(accUser,password,accMail);
         else
             System.out.println("Skipping TOS acceptance");

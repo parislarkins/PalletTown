@@ -1,4 +1,4 @@
-package pikaptchagui;
+package pallettown;
 
 import javax.mail.*;
 import javax.mail.search.SearchTerm;

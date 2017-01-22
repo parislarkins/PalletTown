@@ -1,4 +1,4 @@
-package pikaptchagui;
+package pallettown;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class UrlUtil {
 //                System.out.println(response);
                 String inputLine;
                 while ((inputLine = br.readLine()) != null) {
-                    if (Pikaptcha.debug)
+                    if (PalletTown.debug)
                         System.out.println(inputLine);
                 }
                 br.close();

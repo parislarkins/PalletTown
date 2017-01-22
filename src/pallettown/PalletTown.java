@@ -1,4 +1,4 @@
-package pikaptchagui;
+package pallettown;
 
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 /**
  * Created by Paris on 20/01/2017.
  */
-public class Pikaptcha {
+public class PalletTown {
 
     public static String plusMail;
     public static String userName;

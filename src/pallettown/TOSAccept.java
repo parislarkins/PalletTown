@@ -1,4 +1,4 @@
-package pikaptchagui;
+package pallettown;
 
 /**
  * Created by Paris on 20/01/2017.
