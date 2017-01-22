@@ -27,7 +27,6 @@ import java.util.ArrayList;
  */
 public class GUI extends Application{
 
-
     private static final int VIEWER_WIDTH = 500;
     private static final int VIEWER_HEIGHT = 500;
 
@@ -39,9 +38,8 @@ public class GUI extends Application{
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
-        primaryStage.setTitle("PalletTown GUI");
+        primaryStage.setTitle("PalletTown");
         Scene scene = new Scene(root);
-
 
         // load the image
         Image background = new Image("pallet-town.jpg");

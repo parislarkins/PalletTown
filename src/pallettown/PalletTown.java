@@ -70,13 +70,8 @@ public class PalletTown {
         System.out.println("Starting");
 
         AccountCreator.createAccounts(userName,password,plusMail,captchaKey);
-        for (int i = 0; i < count; i++) {
 
-
-//            String append = accUser+":"+password + "\n";
-//            System.out.println("Appending: ");
-//            outputAppend(append);
-        }
+        System.out.println(AccountCreator.success + "/" + count + " successes");
 
         if(autoVerify && !gmail.equals("") && !gmailPass.equals("")){
             System.out.println("Account Creation done");
@@ -89,7 +84,7 @@ public class PalletTown {
             }
 
             System.out.println("Verifying accounts...");
-            GmailVerifier.verify(gmail,gmailPass);
+            GmailVerifier.verify(gmail,gmailPass,AccountCreator.success);
             System.out.println("Done!");
         }
 

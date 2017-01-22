@@ -1,9 +1,12 @@
 package pallettown;
 
-import java.io.BufferedReader;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Scanner;
 
 /**
  * Created by Paris on 20/01/2017.
@@ -12,7 +15,7 @@ public class AccountCreator implements Runnable{
 
     static final String BASE_URL = "https://club.pokemon.com/us/pokemon-trainer-club";
     private static final long CAPTCHA_TIMEOUT = 6000;
-    private static final int THREADS = 2;
+    private static final int THREADS = 5;
 
     private static String username;
     private static String password;
@@ -23,6 +26,8 @@ public class AccountCreator implements Runnable{
 
     int accNum = 0;
 
+    static int success = 0;
+
     public static boolean createAccounts(String user, String pass, String plus, String captcha) {
 
         username = user;
@@ -32,52 +37,69 @@ public class AccountCreator implements Runnable{
 
         WORK_ITEMS = PalletTown.count;
 
-        AccountCreator accCreator = new AccountCreator();
-        Thread[] threads = new Thread[THREADS];
+        if(PalletTown.captchaKey.equals("")){
+            System.out.println("manual captcha");
+            for (int i = 0; i < PalletTown.count; i++) {
+                createAccount(i);
+            }
+        }else{
+            AccountCreator accCreator = new AccountCreator();
+            Thread[] threads = new Thread[THREADS];
 
-        for (int i = 0; i < THREADS; i++) {
-            threads[i] = new Thread(accCreator,"Worker " + i);
+            for (int i = 0; i < THREADS; i++) {
+                threads[i] = new Thread(accCreator,"Worker " + i);
+            }
+
+            for (int i = 0; i < THREADS; i++) {
+                threads[i].start();
+            }
+
+            System.out.println(Thread.currentThread().getName()+ " is twiddling its thumbs");
+            try {
+                for (int i = 0; i < THREADS; i++)
+                    threads[i].join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
-        for (int i = 0; i < THREADS; i++) {
-            threads[i].start();
-        }
-
-        System.out.println(Thread.currentThread().getName()+ " is twiddling its thumbs");
-        try {
-            for (int i = 0; i < THREADS; i++)
-                threads[i].join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-//
-//        for (int i = 0; i < PalletTown.count; i++) {
-//            createAccount(i);
-//        }
         System.out.println("done");
 
         return true;
     }
 
+
+    private volatile boolean exit = false;
+
     @Override
     public void run() {
+        while(!exit){
+            int mytaskcount = 0;
 
-        int mytaskcount = 0;
+            int accNum;
+            while ((accNum = incAccNum()) < WORK_ITEMS) {
+                System.out.println(Thread.currentThread().getName()+" making account "+ accNum);
+                createAccount(accNum);
+                System.out.println(Thread.currentThread().getName() + "done making account " + accNum);
+                mytaskcount++;
+            }
 
-        int accNum;
-        while ((accNum = incAccNum()) < WORK_ITEMS) {
-            System.out.println(Thread.currentThread().getName()+" making account "+ accNum);
-            createAccount(accNum);
-            System.out.println(Thread.currentThread().getName() + "done making account " + accNum);
-            mytaskcount++;
+            System.out.println(Thread.currentThread().getName()+" did "+mytaskcount+ " tasks");
         }
+    }
 
-        System.out.println(Thread.currentThread().getName()+" did "+mytaskcount+ " tasks");
+    public void Stop(){
+        exit = true;
     }
 
     synchronized
     private int incAccNum() {
         return accNum++;
+    }
+
+    static synchronized
+    private void incSuccess(){
+        success++;
     }
 
     private static void createAccount(int accNum) {
@@ -97,11 +119,19 @@ public class AccountCreator implements Runnable{
         String accMail = plusMail.replace("@","+" + accUser + "@");
 
         System.out.println("  Username: " + accUser);
-        PalletTown.outputAppend(accUser+":"+password);
         System.out.println("  Password: " + password);
         System.out.println("  Email   : " + accMail);
 
-        createAccPy(accUser,password,accMail,birthday, captchaKey);
+        boolean createAcc = createAccPy(accUser,password,accMail,birthday, captchaKey);
+
+        System.out.println(createAcc ? "Account " + accNum + " created succesfully" : "Account " + accNum + " failed");
+
+        if(!createAcc)
+            return;
+
+        incSuccess();
+        if(PalletTown.outputFile != null)
+            PalletTown.outputAppend(accUser+":"+password);
 
         if(PalletTown.acceptTos)
             TOSAccept.acceptTos(accUser,password,accMail);
@@ -109,28 +139,61 @@ public class AccountCreator implements Runnable{
             System.out.println("Skipping TOS acceptance");
     }
 
+    public static void main(String[] args) {
+        createAccPy("palletttrainer10","J@kolantern7","miminpari+pallettrainer10@hotmail.com","1957-1-1","5d579f38e793dc5b3d4905540a4215fa");
+    }
+
     private static boolean createAccPy(String username, String password, String email, String dob, String captchaKey){
         try{
-            ProcessBuilder pb = new ProcessBuilder("python","accountcreate.py","\""+username + "\"",
-                    "\""+password + "\"","\""+email + "\"","\""+dob + "\"","\""+captchaKey + "\"");
 
+//                    String.format("create_account(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",60)\n",username,password,email,dob,captchaKey);
+
+//            StringWriter writer = new StringWriter(); //ouput will be stored here
+//
+//            ScriptEngineManager manager = new ScriptEngineManager();
+//            ScriptContext context = new SimpleScriptContext();
+//
+//            context.setWriter(writer); //configures output redirection
+//            ScriptEngine engine = manager.getEngineByName("python");
+//
+//
+//            engine.eval(prg, context);
+//            System.out.println(writer.toString());
+//
+//            PythonInterpreter interpreter = new PythonInterpreter();
+//            interpreter.exec(prg);
+//            // execute a function that takes a string and returns a string
+//            PyObject someFunc = interpreter.get("create_account");
+//            PyObject result = someFunc.__call__(new PyString[] {new PyString(username),new PyString(password), new PyString(email), new PyString(dob), new PyString(captchaKey)});
+//            String realResult = (String) result.__tojava__(String.class);
+
+            ProcessBuilder pb = new ProcessBuilder().command("python","accountcreate.py","\""+username + "\"",
+                    "\""+password + "\"","\""+email + "\"","\""+dob + "\"","\""+captchaKey + "\"");
 
             pb.redirectErrorStream(true);
 
             Process p = pb.start();
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            Scanner in = new Scanner(new InputStreamReader(p.getInputStream()));
 
-            String line;
+            Timer timer = new Timer(120000, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent arg0) {
+                }
+            });
+            timer.setRepeats(false); // Only execute once
+            timer.start(); // Go go go!
 
-            System.out.println(in.lines().count());
-            while ((line = in.readLine()) != null){
-                System.out.println("Python output redirected: " + line);
-                if(line.equals("Account succesfully created"))
-                    System.out.println("account succesfully created");
-                    return true;
+            String line = "dud";
+            while(in.hasNext()){
+                line = in.nextLine();
             }
 
+
+            System.out.println(line);
+            if (line.equals("Account successfully created."))
+                return true;
+//
         }catch(Exception e){
             e.printStackTrace();
         }

@@ -21,15 +21,13 @@ public class GmailVerifier {
     private static final String HOST = "imap.gmail.com";
     private static Folder inbox;
 
-    public static void verify(String gmail, String gmailPass) {
+    public static void verify(String gmail, String gmailPass, int accounts) {
 
         mailServerProperties.put("mail.imap.host", HOST);
         mailServerProperties.put("mail.imap.port", "993");
         mailServerProperties.put("mail.imap.starttls.enable", "true");
         getMailSession = Session.getDefaultInstance(mailServerProperties, null);
 
-        // Step3
-        System.out.println("\n\n 3rd ===> Get Session and Send mail");
         try {
             store = getMailSession.getStore("imaps");
             store.connect(HOST, gmail, gmailPass);
@@ -64,11 +62,21 @@ public class GmailVerifier {
 
             processMail(foundMessages);
 
-            inbox.close(true);
-            store.close();
+            if(foundMessages.length < accounts){
+                System.out.println("Not all verification emails received in time");
+                System.out.println("Waiting another 3 minutes then trying again");
+                inbox.close(true);
+                store.close();
+
+                Thread.sleep(180000);
+
+                verify(gmail,gmailPass,accounts - foundMessages.length);
+            }
         } catch (NoSuchProviderException e) {
             e.printStackTrace();
         } catch (MessagingException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
@@ -77,6 +85,7 @@ public class GmailVerifier {
 
     private static void processMail(Message[] foundMessages) {
         System.out.println("Processing " +foundMessages.length + " emails");
+
 
         if(foundMessages.length == 0){
             System.out.println("no emails found");
