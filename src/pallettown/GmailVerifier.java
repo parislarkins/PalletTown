@@ -1,3 +1,5 @@
+package pikaptchagui;
+
 import javax.mail.*;
 import javax.mail.search.SearchTerm;
 import java.io.IOException;

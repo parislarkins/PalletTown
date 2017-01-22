@@ -1,3 +1,5 @@
+package pikaptchagui;
+
 import javax.mail.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

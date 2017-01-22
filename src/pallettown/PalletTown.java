@@ -1,3 +1,5 @@
+package pikaptchagui;
+
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -25,6 +27,7 @@ public class Pikaptcha {
     public static String gmailPass;
     public static boolean acceptTos;
     public static File outputFile;
+    public static boolean debug;
 
     public static void Start(){
         parseArgs();
@@ -128,7 +131,7 @@ public class Pikaptcha {
     }
 
     private static boolean validatePass(String password) {
-        Pattern pattern = Pattern.compile("((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{6,20})");
+        Pattern pattern = Pattern.compile("((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!^~`&*(){}@#$%]).{6,20})");
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();
 }
@@ -188,6 +191,10 @@ public class Pikaptcha {
         HBox output = (HBox) vb.getChildren().get(10);
         TextField path = (TextField) output.getChildren().get(1);
         outputFile = path.getText().equals("") ? null : new File(path.getText());
+
+        CheckBox debugMode = (CheckBox) vb.getChildren().get(12);
+        debug = debugMode.isSelected();
+
     }
 
 }

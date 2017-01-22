@@ -1,3 +1,5 @@
+package pikaptchagui;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Calendar;
@@ -48,9 +50,11 @@ public class AccountCreator implements Runnable{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
+//
+//        for (int i = 0; i < Pikaptcha.count; i++) {
+//            createAccount(i);
+//        }
         System.out.println("done");
-
 
         return true;
     }
@@ -62,7 +66,9 @@ public class AccountCreator implements Runnable{
 
         int accNum;
         while ((accNum = incAccNum()) < WORK_ITEMS) {
+            System.out.println(Thread.currentThread().getName()+" making account "+ accNum);
             createAccount(accNum);
+            System.out.println(Thread.currentThread().getName() + "done making account " + accNum);
             mytaskcount++;
         }
 
@@ -74,7 +80,7 @@ public class AccountCreator implements Runnable{
         return accNum++;
     }
 
-    private void createAccount(int accNum) {
+    private static void createAccount(int accNum) {
         String birthday = randomBirthday();
 
         System.out.println("Making account #" + (accNum+1));
@@ -95,26 +101,31 @@ public class AccountCreator implements Runnable{
         System.out.println("  Password: " + password);
         System.out.println("  Email   : " + accMail);
 
+        createAccPy(accUser,password,accMail,birthday, captchaKey);
+
         if(Pikaptcha.acceptTos)
             TOSAccept.acceptTos(accUser,password,accMail);
         else
             System.out.println("Skipping TOS acceptance");
-
-        createAccPy(accUser,password,accMail,birthday, captchaKey);
     }
 
     private static boolean createAccPy(String username, String password, String email, String dob, String captchaKey){
         try{
-            ProcessBuilder pb = new ProcessBuilder("python","src/accountcreate.py","\""+username + "\"",
+            ProcessBuilder pb = new ProcessBuilder("python","accountcreate.py","\""+username + "\"",
                     "\""+password + "\"","\""+email + "\"","\""+dob + "\"","\""+captchaKey + "\"");
+
+
+            pb.redirectErrorStream(true);
 
             Process p = pb.start();
 
             BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
             String line;
+
+            System.out.println(in.lines().count());
             while ((line = in.readLine()) != null){
-//                System.out.println(line);
+                System.out.println("Python output redirected: " + line);
                 if(line.equals("Account succesfully created"))
                     System.out.println("account succesfully created");
                     return true;

@@ -1,3 +1,5 @@
+package pikaptchagui;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,7 +30,8 @@ public class UrlUtil {
 //                System.out.println(response);
                 String inputLine;
                 while ((inputLine = br.readLine()) != null) {
-//                    System.out.println(inputLine);
+                    if (Pikaptcha.debug)
+                        System.out.println(inputLine);
                 }
                 br.close();
 
