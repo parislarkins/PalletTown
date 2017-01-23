@@ -40,6 +40,7 @@ public class GUI extends Application{
         this.primaryStage = primaryStage;
         primaryStage.setTitle("PalletTown");
         Scene scene = new Scene(root);
+        primaryStage.setResizable(false);
 
         // load the image
         Image background = new Image("pallet-town.jpg");
@@ -48,18 +49,17 @@ public class GUI extends Application{
         ImageView viewBG = new ImageView();
         viewBG.setImage(background);
 
-        root.getChildren().add(viewBG);
-
         root.getChildren().add(controls);
 
         makeControls();
-
 
         primaryStage.setScene(scene);
         primaryStage.show();
 
         viewBG.setFitHeight(scene.getHeight());
+        viewBG.setFitWidth(scene.getWidth());
 
+        root.getChildren().add(0,viewBG);
         makePython();
     }
 
@@ -67,188 +67,296 @@ public class GUI extends Application{
 
         try {
             String prg = "import sys\n" +
-                "import time\n" +
-                "import string\n" +
-                "import random\n" +
-                "import datetime\n" +
-                "import urllib2\n" +
-                "\n" +
-                "from selenium import webdriver\n" +
-                "from selenium.webdriver.support.ui import WebDriverWait\n" +
-                "from selenium.webdriver.support import expected_conditions as EC\n" +
-                "from selenium.webdriver.common.by import By\n" +
-                "from selenium.common.exceptions import StaleElementReferenceException, TimeoutException\n" +
-                "from selenium.webdriver.common.desired_capabilities import DesiredCapabilities\n" +
-                "from pikaptcha.jibber import *\n" +
-                "from pikaptcha.ptcexceptions import *\n" +
-                "from pikaptcha.url import *\n" +
-                "\n" +
-                "user_agent = (\n" +
-                "    \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) \" + \"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36\")\n" +
-                "\n" +
-                "BASE_URL = \"https://club.pokemon.com/us/pokemon-trainer-club\"\n" +
-                "\n" +
-                "# endpoints taken from PTCAccount\n" +
-                "SUCCESS_URLS = (\n" +
-                "    'https://club.pokemon.com/us/pokemon-trainer-club/parents/email',\n" +
-                "    # This initially seemed to be the proper success redirect\n" +
-                "    'https://club.pokemon.com/us/pokemon-trainer-club/sign-up/',\n" +
-                "    # but experimentally it now seems to return to the sign-up, but still registers\n" +
-                ")\n" +
-                "\n" +
-                "# As both seem to work, we'll check against both success destinations until I have I better idea for how to check success\n" +
-                "DUPE_EMAIL_URL = 'https://club.pokemon.com/us/pokemon-trainer-club/forgot-password?msg=users.email.exists'\n" +
-                "BAD_DATA_URL = 'https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up'\n" +
-                "\n" +
-                "def create_account(username, password, email, birthday, captchakey2, captchatimeout):\n" +
-                "\n" +
-                "    print(\"Attempting to create user {user}:{pw}. Opening browser...\".format(user=username, pw=password))\n" +
-                "   \n" +
-                "    if(captchakey2 == \"\"):\n" +
-                "        captchakey2 = None\n" +
-                "\n" +
-                "    if captchakey2 != None:\n" +
-                "        print(\"2captcha key\")\n" +
-                "        dcap = dict(DesiredCapabilities.PHANTOMJS)\n" +
-                "        dcap[\"phantomjs.page.settings.userAgent\"] = user_agent\n" +
-                "        driver = webdriver.PhantomJS(desired_capabilities=dcap)\n" +
-                "        # driver = webdriver.Chrome()\n" +
-                "    else:\n" +
-                "        print(\"No 2captcha key\")\n" +
-                "        driver = webdriver.Chrome()\n" +
-                "        driver.set_window_size(600, 600)\n" +
-                "\n" +
-                "    # Input age: 1992-01-08\n" +
-                "    print(\"Step 1: Verifying age using birthday: {}\".format(birthday))\n" +
-                "    driver.get(\"{}/sign-up/\".format(BASE_URL))\n" +
-                "    assert driver.current_url == \"{}/sign-up/\".format(BASE_URL)\n" +
-                "    elem = driver.find_element_by_name(\"dob\")\n" +
-                "\n" +
-                "    # Workaround for different region not having the same input type\n" +
-                "    driver.execute_script(\n" +
-                "        \"var input = document.createElement('input'); input.type='text'; input.setAttribute('name', 'dob'); arguments[0].parentNode.replaceChild(input, arguments[0])\",\n" +
-                "        elem)\n" +
-                "\n" +
-                "    elem = driver.find_element_by_name(\"dob\")\n" +
-                "    elem.send_keys(birthday)\n" +
-                "    elem.submit()\n" +
-                "    # Todo: ensure valid birthday\n" +
-                "\n" +
-                "    # Create account page\n" +
-                "    print(\"Step 2: Entering account details\")\n" +
-                "    assert driver.current_url == \"{}/parents/sign-up\".format(BASE_URL)\n" +
-                "\n" +
-                "    user = driver.find_element_by_name(\"username\")\n" +
-                "    user.clear()\n" +
-                "    user.send_keys(username)\n" +
-                "\n" +
-                "    elem = driver.find_element_by_name(\"password\")\n" +
-                "    elem.clear()\n" +
-                "    elem.send_keys(password)\n" +
-                "\n" +
-                "    elem = driver.find_element_by_name(\"confirm_password\")\n" +
-                "    elem.clear()\n" +
-                "    elem.send_keys(password)\n" +
-                "\n" +
-                "    elem = driver.find_element_by_name(\"email\")\n" +
-                "    elem.clear()\n" +
-                "    elem.send_keys(email)\n" +
-                "\n" +
-                "    elem = driver.find_element_by_name(\"confirm_email\")\n" +
-                "    elem.clear()\n" +
-                "    elem.send_keys(email)\n" +
-                "\n" +
-                "    driver.find_element_by_id(\"id_public_profile_opt_in_1\").click()\n" +
-                "    driver.find_element_by_name(\"terms\").click()\n" +
-                "\n" +
-                "    if captchakey2 == None:\n" +
-                "        # Do manual captcha entry\n" +
-                "        print(\"You did not pass a 2captcha key. Please solve the captcha manually.\")\n" +
-                "        elem = driver.find_element_by_class_name(\"g-recaptcha\")\n" +
-                "        driver.execute_script(\"arguments[0].scrollIntoView(true);\", elem)\n" +
-                "        # Waits 1 minute for you to input captcha\n" +
-                "        try:\n" +
-                "            WebDriverWait(driver, 60).until(\n" +
-                "                EC.text_to_be_present_in_element_value((By.NAME, \"g-recaptcha-response\"), \"\"))\n" +
-                "            print(\"Waiting on captcha\")\n" +
-                "            print(\"Captcha successful. Sleeping for 1 second...\")\n" +
-                "            time.sleep(1)\n" +
-                "        except TimeoutException, err:\n" +
-                "            print(\"Timed out while manually solving captcha\")\n" +
-                "            return False\n" +
-                "    else:\n" +
-                "        # Now to automatically handle captcha\n" +
-                "        print(\"Starting autosolve recaptcha\")\n" +
-                "        html_source = driver.page_source\n" +
-                "\n" +
-                "        gkey_index = html_source.find(\"https://www.google.com/recaptcha/api2/anchor?k=\") + 47\n" +
-                "        gkey = html_source[gkey_index:gkey_index + 40]\n" +
-                "        recaptcharesponse = \"Failed\"\n" +
-                "        url=\"http://club.pokemon.com\"\n" +
-                "        while (recaptcharesponse == \"Failed\"):\n" +
-                "            recaptcharesponse = openurl(\n" +
-                "                \"http://2captcha.com/in.php?key=\" + captchakey2 + \"&method=userrecaptcha&googlekey=\" + gkey)\n" +
-                "            \"http://2captcha.com/in.php?key={}&method=userrecaptcha&googlekey={}&pageurl={}\".format(captchakey2,gkey,url)\n" +
-                "        captchaid = recaptcharesponse[3:]\n" +
-                "        recaptcharesponse = \"CAPCHA_NOT_READY\"\n" +
-                "        elem = driver.find_element_by_class_name(\"g-recaptcha\")\n" +
-                "        print\"We will wait 10 seconds for captcha to be solved by 2captcha\"\n" +
-                "        start_time = int(time.time())\n" +
-                "        timedout = False\n" +
-                "        while recaptcharesponse == \"CAPCHA_NOT_READY\":\n" +
-                "            time.sleep(10)\n" +
-                "            elapsedtime = int(time.time()) - start_time\n" +
-                "            if elapsedtime > captchatimeout:\n" +
-                "                print(\"Captcha timeout reached. Exiting.\")\n" +
-                "                timedout = True\n" +
-                "                break\n" +
-                "            print \"Captcha still not solved, waiting another 10 seconds.\"\n" +
-                "            recaptcharesponse = \"Failed\"\n" +
-                "            while (recaptcharesponse == \"Failed\"):\n" +
-                "                recaptcharesponse = openurl(\n" +
-                "                    \"http://2captcha.com/res.php?key=\" + captchakey2 + \"&action=get&id=\" + captchaid)\n" +
-                "        if timedout == False:\n" +
-                "            solvedcaptcha = recaptcharesponse[3:]\n" +
-                "            captchalen = len(solvedcaptcha)\n" +
-                "            elem = driver.find_element_by_name(\"g-recaptcha-response\")\n" +
-                "            elem = driver.execute_script(\"arguments[0].style.display = 'block'; return arguments[0];\", elem)\n" +
-                "            elem.send_keys(solvedcaptcha)\n" +
-                "            print \"Solved captcha\"\n" +
-                "    try:\n" +
-                "        user.submit()\n" +
-                "    except StaleElementReferenceException:\n" +
-                "        print(\"Error StaleElementReferenceException!\")\n" +
-                "\n" +
-                "    try:\n" +
-                "        _validate_response(driver)\n" +
-                "    except:\n" +
-                "        print(\"Failed to create user: {}\".format(username))\n" +
-                "        driver.quit()\n" +
-                "        raise\n" +
-                "\n" +
-                "    print(\"Account successfully created.\")\n" +
-                "    driver.quit()\n" +
-                "    return True\n" +
-                "\n" +
-                "def _validate_response(driver):\n" +
-                "    url = driver.current_url\n" +
-                "    if url in SUCCESS_URLS:\n" +
-                "        return True\n" +
-                "    elif url == DUPE_EMAIL_URL:\n" +
-                "        print (\"Email already in use\")\n" +
-                "        raise PTCInvalidEmailException(\"Email already in use.\")\n" +
-                "    elif url == BAD_DATA_URL:\n" +
-                "        if \"Enter a valid email address.\" in driver.page_source:\n" +
-                "            print (\"Invalid Email used\")\n" +
-                "            raise PTCInvalidEmailException(\"Invalid email.\")\n" +
-                "        else:\n" +
-                "            print (\"Username already in use\")\n" +
-                "            raise PTCInvalidNameException(\"Username already in use.\")\n" +
-                "    else:\n" +
-                "        print (\"Some other error returned by Niantic\")\n" +
-                "        raise PTCException(\"Generic failure. User was not created.\")\n" +
-                "\n" +
-                "create_account(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],60)\n";
+                    "import time\n" +
+                    "import string\n" +
+                    "import random\n" +
+                    "import datetime\n" +
+                    "import urllib2\n" +
+                    "\n" +
+                    "from selenium import webdriver\n" +
+                    "from selenium.webdriver.support.ui import WebDriverWait\n" +
+                    "from selenium.webdriver.support import expected_conditions as EC\n" +
+                    "from selenium.webdriver.common.by import By\n" +
+                    "from selenium.common.exceptions import StaleElementReferenceException, TimeoutException\n" +
+                    "from selenium.webdriver.common.desired_capabilities import DesiredCapabilities\n" +
+                    "# from pikaptcha.jibber import *\n" +
+                    "# from pikaptcha.ptcexceptions import *\n" +
+                    "# from pikaptcha.url import *\n" +
+                    "\n" +
+                    "user_agent = (\n" +
+                    "    \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) \" + \"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36\")\n" +
+                    "\n" +
+                    "BASE_URL = \"https://club.pokemon.com/us/pokemon-trainer-club\"\n" +
+                    "\n" +
+                    "# endpoints taken from PTCAccount\n" +
+                    "SUCCESS_URLS = (\n" +
+                    "    'https://club.pokemon.com/us/pokemon-trainer-club/parents/email',\n" +
+                    "    # This initially seemed to be the proper success redirect\n" +
+                    "    'https://club.pokemon.com/us/pokemon-trainer-club/sign-up/',\n" +
+                    "    # but experimentally it now seems to return to the sign-up, but still registers\n" +
+                    ")\n" +
+                    "\n" +
+                    "# As both seem to work, we'll check against both success destinations until I have I better idea for how to check success\n" +
+                    "DUPE_EMAIL_URL = 'https://club.pokemon.com/us/pokemon-trainer-club/forgot-password?msg=users.email.exists'\n" +
+                    "BAD_DATA_URL = 'https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up'\n" +
+                    "\n" +
+                    "logfile = \"pallettown.log\"\n" +
+                    "\n" +
+                    "def log(name,str):\n" +
+                    "    prnt = \"[\" + name + \"]: \" + str\n" +
+                    "    print(prnt)\n" +
+                    "    file = open(logfile,\"a\")\n" +
+                    "    file.write(prnt + \"\\n\")\n" +
+                    "    file.close\n" +
+                    "\n" +
+                    "__all__ = [\n" +
+                    "    'PTCException',\n" +
+                    "    'PTCInvalidStatusCodeException',\n" +
+                    "    'PTCInvalidNameException',\n" +
+                    "    'PTCInvalidEmailException',\n" +
+                    "    'PTCInvalidPasswordException',\n" +
+                    "    'PTCInvalidBirthdayException',\n" +
+                    "    'PTCTwocaptchaException'\n" +
+                    "]\n" +
+                    "\n" +
+                    "class PTCException(Exception):\n" +
+                    "    \"\"\"Base exception for all PTC Account exceptions\"\"\"\n" +
+                    "    pass\n" +
+                    "\n" +
+                    "\n" +
+                    "class PTCInvalidStatusCodeException(Exception):\n" +
+                    "    \"\"\"Base exception for all PTC Account exceptions\"\"\"\n" +
+                    "    pass\n" +
+                    "\n" +
+                    "\n" +
+                    "class PTCInvalidNameException(PTCException):\n" +
+                    "    \"\"\"Username already in use\"\"\"\n" +
+                    "    pass\n" +
+                    "\n" +
+                    "\n" +
+                    "class PTCInvalidEmailException(PTCException):\n" +
+                    "    \"\"\"Email invalid or already in use\"\"\"\n" +
+                    "    pass\n" +
+                    "\n" +
+                    "\n" +
+                    "class PTCInvalidPasswordException(PTCException):\n" +
+                    "    \"\"\"Password invalid\"\"\"\n" +
+                    "    pass\n" +
+                    "\n" +
+                    "\n" +
+                    "class PTCInvalidBirthdayException(PTCException):\n" +
+                    "    \"\"\"Birthday invalid\"\"\"\n" +
+                    "    pass\n" +
+                    "\n" +
+                    "class PTCTwocaptchaException(PTCException):\n" +
+                    "    \"\"\"2captcha unable to provide service\"\"\"\n" +
+                    "    pass\n" +
+                    "\n" +
+                    "def openurl(address):\n" +
+                    "    try:\n" +
+                    "        urlresponse = urllib2.urlopen(address).read()\n" +
+                    "        return urlresponse        \n" +
+                    "    except urllib2.HTTPError, e:\n" +
+                    "        print(\"HTTPError = \" + str(e.code))\n" +
+                    "    except urllib2.URLError, e:\n" +
+                    "        print(\"URLError = \" + str(e.code))\n" +
+                    "    except Exception:\n" +
+                    "        import traceback\n" +
+                    "        print(\"Generic Exception: \" + traceback.format_exc())\n" +
+                    "    print(\"Request to \" + address + \"failed.\")    \n" +
+                    "    return \"Failed\"\n" +
+                    "\n" +
+                    "def activateurl(address):\n" +
+                    "    try:\n" +
+                    "        urlresponse = urllib2.urlopen(address)\n" +
+                    "        return urlresponse\n" +
+                    "    except urllib2.HTTPError, e:\n" +
+                    "        print(\"HTTPError = \" + str(e.code))\n" +
+                    "    except urllib2.URLError, e:\n" +
+                    "        print(\"URLError = \" + str(e.args))\n" +
+                    "    except Exception:\n" +
+                    "        import traceback\n" +
+                    "        print(\"Generic Exception: \" + traceback.format_exc())\n" +
+                    "    print(\"Request to \" + address + \"failed.\")    \n" +
+                    "    return \"Failed\"\n" +
+                    "\n" +
+                    "def _validate_response(driver):\n" +
+                    "    url = driver.current_url\n" +
+                    "    if url in SUCCESS_URLS:\n" +
+                    "        return True\n" +
+                    "    elif url == DUPE_EMAIL_URL:\n" +
+                    "        log (threadname,\"Email already in use\")\n" +
+                    "        raise PTCInvalidEmailException(\"Email already in use.\")\n" +
+                    "    elif url == BAD_DATA_URL:\n" +
+                    "        if \"Enter a valid email address.\" in driver.page_source:\n" +
+                    "            log (threadname,\"Invalid Email used\")\n" +
+                    "            raise PTCInvalidEmailException(\"Invalid email.\")\n" +
+                    "        else:\n" +
+                    "            log (threadname,\"Username already in use\")\n" +
+                    "            raise PTCInvalidNameException(\"Username already in use.\")\n" +
+                    "    else:\n" +
+                    "        log (threadname,\"Some other error returned by Niantic\")\n" +
+                    "        raise PTCException(\"Generic failure. User was not created.\")\n" +
+                    "\n" +
+                    "def create_account(username, password, email, birthday, captchakey2, threadname, captchatimeout):\n" +
+                    "\n" +
+                    "    log(threadname,\" initializing..\")\n" +
+                    "    log(threadname,\"Attempting to create user {user}:{pw}. Opening browser...\".format(user=username, pw=password))\n" +
+                    "    \n" +
+                    "    if(captchakey2 == \"\"):\n" +
+                    "        captchakey2 = None\n" +
+                    "\n" +
+                    "    if captchakey2 != None:\n" +
+                    "        log(threadname,\"2captcha key\")\n" +
+                    "        dcap = dict(DesiredCapabilities.PHANTOMJS)\n" +
+                    "        dcap[\"phantomjs.page.settings.userAgent\"] = user_agent\n" +
+                    "        driver = webdriver.PhantomJS(desired_capabilities=dcap)\n" +
+                    "        # driver = webdriver.Chrome()\n" +
+                    "    else:\n" +
+                    "        log(threadname,\"No 2captcha key\")\n" +
+                    "        driver = webdriver.Chrome()\n" +
+                    "        driver.set_window_size(600, 600)\n" +
+                    "\n" +
+                    "    # Input age: 1992-01-08\n" +
+                    "    log(threadname,\"Step 1: Verifying age using birthday: {}\".format(birthday))\n" +
+                    "    try:\n" +
+                    "        driver.get(\"{}/sign-up/\".format(BASE_URL))\n" +
+                    "        log(threadname,\"Driver current url: \" + driver.current_url)\n" +
+                    "    except Exception as e:\n" +
+                    "        log(threadname, \"unkown Error verifying age, terminating\")\n" +
+                    "        driver.quit()\n" +
+                    "        return False\n" +
+                    "\n" +
+                    "    if driver.current_url != \"{}/sign-up/\".format(BASE_URL):\n" +
+                    "        log(threadname,\"Driver url wrong, exiting...\")\n" +
+                    "        driver.quit()\n" +
+                    "        return False\n" +
+                    "        \n" +
+                    "    elem = driver.find_element_by_name(\"dob\")\n" +
+                    "\n" +
+                    "    log(threadname,\"trying to execute workaround script\")\n" +
+                    "    # Workaround for different region not having the same input type\n" +
+                    "    driver.execute_script(\n" +
+                    "        \"var input = document.createElement('input'); input.type='text'; input.setAttribute('name', 'dob'); arguments[0].parentNode.replaceChild(input, arguments[0])\",\n" +
+                    "        elem)\n" +
+                    "    log(threadname,\"done executing workaround script, submitting dob\")\n" +
+                    "\n" +
+                    "    elem = driver.find_element_by_name(\"dob\")\n" +
+                    "    elem.send_keys(birthday)\n" +
+                    "    elem.submit()\n" +
+                    "\n" +
+                    "    log(threadname,\"dob submitted\")\n" +
+                    "    # Todo: ensure valid birthday\n" +
+                    "\n" +
+                    "    # Create account page\n" +
+                    "    log(threadname,\"Step 2: Entering account details\")\n" +
+                    "    assert driver.current_url == \"{}/parents/sign-up\".format(BASE_URL)\n" +
+                    "\n" +
+                    "    user = driver.find_element_by_name(\"username\")\n" +
+                    "    user.clear()\n" +
+                    "    user.send_keys(username)\n" +
+                    "\n" +
+                    "    elem = driver.find_element_by_name(\"password\")\n" +
+                    "    elem.clear()\n" +
+                    "    elem.send_keys(password)\n" +
+                    "\n" +
+                    "    elem = driver.find_element_by_name(\"confirm_password\")\n" +
+                    "    elem.clear()\n" +
+                    "    elem.send_keys(password)\n" +
+                    "\n" +
+                    "    elem = driver.find_element_by_name(\"email\")\n" +
+                    "    elem.clear()\n" +
+                    "    elem.send_keys(email)\n" +
+                    "\n" +
+                    "    elem = driver.find_element_by_name(\"confirm_email\")\n" +
+                    "    elem.clear()\n" +
+                    "    elem.send_keys(email)\n" +
+                    "\n" +
+                    "    driver.find_element_by_id(\"id_public_profile_opt_in_1\").click()\n" +
+                    "    driver.find_element_by_name(\"terms\").click()\n" +
+                    "\n" +
+                    "    if captchakey2 == None:\n" +
+                    "        # Do manual captcha entry\n" +
+                    "        log(threadname,\"You did not pass a 2captcha key. Please solve the captcha manually.\")\n" +
+                    "        elem = driver.find_element_by_class_name(\"g-recaptcha\")\n" +
+                    "        driver.execute_script(\"arguments[0].scrollIntoView(true);\", elem)\n" +
+                    "        # Waits 1 minute for you to input captcha\n" +
+                    "        try:\n" +
+                    "            WebDriverWait(driver, 60).until(\n" +
+                    "                EC.text_to_be_present_in_element_value((By.NAME, \"g-recaptcha-response\"), \"\"))\n" +
+                    "            log(threadname,\"Waiting on captcha\")\n" +
+                    "            log(threadname,\"Captcha successful. Sleeping for 1 second...\")\n" +
+                    "            time.sleep(1)\n" +
+                    "        except TimeoutException, err:\n" +
+                    "            log(threadname,\"Timed out while manually solving captcha\")\n" +
+                    "            driver.quit()\n" +
+                    "            return False\n" +
+                    "    else:\n" +
+                    "        # Now to automatically handle captcha\n" +
+                    "        log(threadname,\"Starting autosolve recaptcha\")\n" +
+                    "        html_source = driver.page_source\n" +
+                    "\n" +
+                    "        gkey_index = html_source.find(\"https://www.google.com/recaptcha/api2/anchor?k=\") + 47\n" +
+                    "        gkey = html_source[gkey_index:gkey_index + 40]\n" +
+                    "        recaptcharesponse = \"Failed\"\n" +
+                    "        url=\"http://club.pokemon.com\"\n" +
+                    "        while (recaptcharesponse == \"Failed\"):\n" +
+                    "            recaptcharesponse = openurl(\n" +
+                    "                \"http://2captcha.com/in.php?key=\" + captchakey2 + \"&method=userrecaptcha&googlekey=\" + gkey)\n" +
+                    "            \"http://2captcha.com/in.php?key={}&method=userrecaptcha&googlekey={}&pageurl={}\".format(captchakey2,gkey,url)\n" +
+                    "        captchaid = recaptcharesponse[3:]\n" +
+                    "        recaptcharesponse = \"CAPCHA_NOT_READY\"\n" +
+                    "        elem = driver.find_element_by_class_name(\"g-recaptcha\")\n" +
+                    "        log(threadname,\"We will wait 10 seconds for captcha to be solved by 2captcha\")\n" +
+                    "        start_time = int(time.time())\n" +
+                    "        timedout = False\n" +
+                    "        while recaptcharesponse == \"CAPCHA_NOT_READY\":\n" +
+                    "            time.sleep(10)\n" +
+                    "            elapsedtime = int(time.time()) - start_time\n" +
+                    "            if elapsedtime > captchatimeout:\n" +
+                    "                log(threadname,\"Captcha timeout reached. Exiting.\")\n" +
+                    "                driver.quit()\n" +
+                    "                timedout = True\n" +
+                    "                return True\n" +
+                    "            log (threadname,\"Captcha still not solved, waiting another 10 seconds.\")\n" +
+                    "            recaptcharesponse = \"Failed\"\n" +
+                    "            while (recaptcharesponse == \"Failed\"):\n" +
+                    "                recaptcharesponse = openurl(\n" +
+                    "                    \"http://2captcha.com/res.php?key=\" + captchakey2 + \"&action=get&id=\" + captchaid)\n" +
+                    "        if timedout == False:\n" +
+                    "            solvedcaptcha = recaptcharesponse[3:]\n" +
+                    "            captchalen = len(solvedcaptcha)\n" +
+                    "            elem = driver.find_element_by_name(\"g-recaptcha-response\")\n" +
+                    "            elem = driver.execute_script(\"arguments[0].style.display = 'block'; return arguments[0];\", elem)\n" +
+                    "            elem.send_keys(solvedcaptcha)\n" +
+                    "            log (threadname,\"Solved captcha\")\n" +
+                    "    try:\n" +
+                    "        log (threadname,\"trying to submit\")\n" +
+                    "        user.submit()\n" +
+                    "        log (threadname,\"submitted\")\n" +
+                    "    except StaleElementReferenceException:\n" +
+                    "        log(threadname,\"Error StaleElementReferenceException!\")\n" +
+                    "        driver.quit()\n" +
+                    "        return False\n" +
+                    "\n" +
+                    "    try:\n" +
+                    "        log (threadname,\"trying to validate response\")\n" +
+                    "        _validate_response(driver)\n" +
+                    "        log (threadname,\"validated response\")\n" +
+                    "    except:\n" +
+                    "        log(threadname,\"Failed to create user: {}\".format(username) + \"exiting...\")\n" +
+                    "        driver.quit()\n" +
+                    "        raise PTCInvalidNameException(\"failed to create user\")\n" +
+                    "        log(threadname, \"threw failed to create user exception, terminate\")\n" +
+                    "        return False\n" +
+                    "\n" +
+                    "    driver.quit()\n" +
+                    "    log(threadname,\"Closed driver\")\n" +
+                    "    log(threadname,\"Account successfully created.\\n \\n\")\n" +
+                    "    return True\n" +
+                    "\n" +
+                    "create_account(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],60)";
+
             BufferedWriter out = new BufferedWriter(new FileWriter("accountcreate.py"));
             out.write(prg);
             out.close();

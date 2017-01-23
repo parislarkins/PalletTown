@@ -30,8 +30,8 @@ public class UrlUtil {
 //                System.out.println(response);
                 String inputLine;
                 while ((inputLine = br.readLine()) != null) {
-                    if (PalletTown.debug)
-                        System.out.println(inputLine);
+//                    if (PalletTown.debug)
+//                        System.out.println(inputLine);
                 }
                 br.close();
 

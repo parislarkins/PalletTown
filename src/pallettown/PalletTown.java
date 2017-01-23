@@ -32,6 +32,8 @@ public class PalletTown {
     public static void Start(){
         parseArgs();
 
+        AccountCreator.success = 0;
+
         if(!captchaKey.equals("")){
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("2Captcha Balance");
@@ -62,7 +64,7 @@ public class PalletTown {
             System.out.println("aborting...");
             return;
         }
-        
+
         if(autoVerify && outputFile != null){
 //            outputAppend("\nThe following accounts use the email address: " + plusMail + "\n");
         }
@@ -72,6 +74,9 @@ public class PalletTown {
         AccountCreator.createAccounts(userName,password,plusMail,captchaKey);
 
         System.out.println(AccountCreator.success + "/" + count + " successes");
+
+        if(AccountCreator.success == 0)
+            return;
 
         if(autoVerify && !gmail.equals("") && !gmailPass.equals("")){
             System.out.println("Account Creation done");

@@ -1,11 +1,6 @@
 package pallettown;
 
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.InputStreamReader;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Scanner;
 
 /**
@@ -40,7 +35,7 @@ public class AccountCreator implements Runnable{
         if(PalletTown.captchaKey.equals("")){
             System.out.println("manual captcha");
             for (int i = 0; i < PalletTown.count; i++) {
-                createAccount(i);
+                createAccount(i, Thread.currentThread().getName());
             }
         }else{
             AccountCreator accCreator = new AccountCreator();
@@ -68,28 +63,19 @@ public class AccountCreator implements Runnable{
         return true;
     }
 
-
-    private volatile boolean exit = false;
-
     @Override
     public void run() {
-        while(!exit){
-            int mytaskcount = 0;
+        int mytaskcount = 0;
 
-            int accNum;
-            while ((accNum = incAccNum()) < WORK_ITEMS) {
-                System.out.println(Thread.currentThread().getName()+" making account "+ accNum);
-                createAccount(accNum);
-                System.out.println(Thread.currentThread().getName() + "done making account " + accNum);
-                mytaskcount++;
-            }
-
-            System.out.println(Thread.currentThread().getName()+" did "+mytaskcount+ " tasks");
+        int accNum;
+        while ((accNum = incAccNum()) < WORK_ITEMS) {
+            System.out.println(Thread.currentThread().getName()+" making account "+ accNum);
+            createAccount(accNum,Thread.currentThread().getName());
+            System.out.println(Thread.currentThread().getName() + "done making account " + accNum);
+            mytaskcount++;
         }
-    }
 
-    public void Stop(){
-        exit = true;
+        System.out.println(Thread.currentThread().getName()+" did "+mytaskcount+ " tasks");
     }
 
     synchronized
@@ -102,8 +88,8 @@ public class AccountCreator implements Runnable{
         success++;
     }
 
-    private static void createAccount(int accNum) {
-        String birthday = randomBirthday();
+    private static void createAccount(int accNum, String name) {
+        String birthday = RandomDetails.randomBirthday();
 
         System.out.println("Making account #" + (accNum+1));
 
@@ -122,7 +108,7 @@ public class AccountCreator implements Runnable{
         System.out.println("  Password: " + password);
         System.out.println("  Email   : " + accMail);
 
-        boolean createAcc = createAccPy(accUser,password,accMail,birthday, captchaKey);
+        boolean createAcc = createAccPy(accUser,password,accMail,birthday,captchaKey,name);
 
         System.out.println(createAcc ? "Account " + accNum + " created succesfully" : "Account " + accNum + " failed");
 
@@ -139,11 +125,11 @@ public class AccountCreator implements Runnable{
             System.out.println("Skipping TOS acceptance");
     }
 
-    public static void main(String[] args) {
-        createAccPy("palletttrainer10","J@kolantern7","miminpari+pallettrainer10@hotmail.com","1957-1-1","5d579f38e793dc5b3d4905540a4215fa");
-    }
+//    public static void main(String[] args) {
+//        createAccPy("palletttrainer10","J@kolantern7","miminpari+pallettrainer10@hotmail.com","1957-1-1","5d579f38e793dc5b3d4905540a4215fa", name);
+//    }
 
-    private static boolean createAccPy(String username, String password, String email, String dob, String captchaKey){
+    private static boolean createAccPy(String username, String password, String email, String dob, String captchaKey, String name){
         try{
 
 //                    String.format("create_account(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",60)\n",username,password,email,dob,captchaKey);
@@ -167,8 +153,18 @@ public class AccountCreator implements Runnable{
 //            PyObject result = someFunc.__call__(new PyString[] {new PyString(username),new PyString(password), new PyString(email), new PyString(dob), new PyString(captchaKey)});
 //            String realResult = (String) result.__tojava__(String.class);
 
-            ProcessBuilder pb = new ProcessBuilder().command("python","accountcreate.py","\""+username + "\"",
-                    "\""+password + "\"","\""+email + "\"","\""+dob + "\"","\""+captchaKey + "\"");
+            String[] commands = new String[] {
+                    "python",
+                    "accountcreate.py",
+                    "\""+username + "\"",
+                    "\""+password + "\"",
+                    "\""+email + "\"",
+                    "\""+dob + "\"",
+                    "\""+captchaKey + "\"",
+                    "\"" + name + "\""
+            };
+
+            ProcessBuilder pb = new ProcessBuilder(commands);
 
             pb.redirectErrorStream(true);
 
@@ -176,22 +172,24 @@ public class AccountCreator implements Runnable{
 
             Scanner in = new Scanner(new InputStreamReader(p.getInputStream()));
 
-            Timer timer = new Timer(120000, new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent arg0) {
-                }
-            });
-            timer.setRepeats(false); // Only execute once
-            timer.start(); // Go go go!
+//            Timer timer = new Timer(120000, new ActionListener() {
+//                @Override
+//                public void actionPerformed(ActionEvent arg0) {
+//                }
+//            });
+//            timer.setRepeats(false); // Only execute once
+//            timer.start(); // Go go go!
 
             String line = "dud";
             while(in.hasNext()){
                 line = in.nextLine();
+                if(PalletTown.debug)
+                    System.out.println("    [DEBUG]:" + line);
             }
 
 
             System.out.println(line);
-            if (line.equals("Account successfully created."))
+            if (line.contains("Account successfully created."))
                 return true;
 //
         }catch(Exception e){
@@ -199,24 +197,6 @@ public class AccountCreator implements Runnable{
         }
 
         return false;
-    }
-
-    private static String randomBirthday() {
-        GregorianCalendar gc = new GregorianCalendar();
-
-        int year = randBetween(1900, 2000);
-
-        gc.set(Calendar.YEAR, year);
-
-        int dayOfYear = randBetween(1, gc.getActualMaximum(gc.DAY_OF_YEAR));
-
-        gc.set(Calendar.DAY_OF_YEAR, dayOfYear);
-
-        return (gc.get(Calendar.YEAR) + "-" + (gc.get(gc.MONTH) + 1) + "-" + gc.get(gc.DAY_OF_MONTH));
-    }
-
-    public static int randBetween(int start, int end) {
-        return start + (int)Math.round(Math.random() * (end - start));
     }
 
 }
