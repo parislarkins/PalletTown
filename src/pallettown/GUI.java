@@ -11,8 +11,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -159,7 +159,7 @@ public class GUI extends Application{
                     "    except urllib2.HTTPError, e:\n" +
                     "        print(\"HTTPError = \" + str(e.code))\n" +
                     "    except urllib2.URLError, e:\n" +
-                    "        print(\"URLError = \" + str(e.code))\n" +
+                    "        print(\"URLError = \" + str(e.args))\n" +
                     "    except Exception:\n" +
                     "        import traceback\n" +
                     "        print(\"Generic Exception: \" + traceback.format_exc())\n" +
@@ -198,7 +198,7 @@ public class GUI extends Application{
                     "        log (threadname,\"Some other error returned by Niantic\")\n" +
                     "        raise PTCException(\"Generic failure. User was not created.\")\n" +
                     "\n" +
-                    "def create_account(username, password, email, birthday, captchakey2, threadname, captchatimeout):\n" +
+                    "def create_account(username, password, email, birthday, captchakey2, threadname, proxy, captchatimeout):\n" +
                     "\n" +
                     "    log(threadname,\" initializing..\")\n" +
                     "    log(threadname,\"Attempting to create user {user}:{pw}. Opening browser...\".format(user=username, pw=password))\n" +
@@ -210,12 +210,37 @@ public class GUI extends Application{
                     "        log(threadname,\"2captcha key\")\n" +
                     "        dcap = dict(DesiredCapabilities.PHANTOMJS)\n" +
                     "        dcap[\"phantomjs.page.settings.userAgent\"] = user_agent\n" +
-                    "        driver = webdriver.PhantomJS(desired_capabilities=dcap)\n" +
+                    "\n" +
+                    "        print(proxy)\n" +
+                    "        if proxy != \"\":\n" +
+                    "            serv_args = [\n" +
+                    "                '--proxy=https://' + proxy,\n" +
+                    "                '--proxy-type=https',\n" +
+                    "            ]\n" +
+                    "            driver = webdriver.PhantomJS(desired_capabilities=dcap,service_args=serv_args)\n" +
+                    "            driver.get(\"http://whatismyip.org/\")\n" +
+                    "            log(threadname,\"proxy: \" + proxy)\n" +
+                    "            log(threadname, driver.current_url)\n" +
+                    "            elem = driver.find_element_by_tag_name(\"span\")\n" +
+                    "            log(threadname, \"span text: \" + elem.text)\n" +
+                    "            if(elem.text == \"180.200.145.4\"):\n" +
+                    "                return True\n" +
+                    "            # return True\n" +
+                    "        else:\n" +
+                    "            driver = webdriver.PhantomJS(desired_capabilities=dcap)\n" +
                     "        # driver = webdriver.Chrome()\n" +
                     "    else:\n" +
                     "        log(threadname,\"No 2captcha key\")\n" +
-                    "        driver = webdriver.Chrome()\n" +
+                    "\n" +
+                    "        chrome_options = webdriver.ChromeOptions()\n" +
+                    "        chrome_options.add_argument('--proxy-server=' + proxy)\n" +
+                    "\n" +
+                    "        driver = webdriver.Chrome(chrome_options=chrome_options)\n" +
                     "        driver.set_window_size(600, 600)\n" +
+                    "        #testing\n" +
+                    "        driver.get(\"http://whatismyipaddress.com\")\n" +
+                    "        log(threadname,\"proxy: \" + proxy)\n" +
+                    "        return True\n" +
                     "\n" +
                     "    # Input age: 1992-01-08\n" +
                     "    log(threadname,\"Step 1: Verifying age using birthday: {}\".format(birthday))\n" +
@@ -301,9 +326,8 @@ public class GUI extends Application{
                     "        recaptcharesponse = \"Failed\"\n" +
                     "        url=\"http://club.pokemon.com\"\n" +
                     "        while (recaptcharesponse == \"Failed\"):\n" +
-                    "            recaptcharesponse = openurl(\n" +
-                    "                \"http://2captcha.com/in.php?key=\" + captchakey2 + \"&method=userrecaptcha&googlekey=\" + gkey)\n" +
-                    "            \"http://2captcha.com/in.php?key={}&method=userrecaptcha&googlekey={}&pageurl={}\".format(captchakey2,gkey,url)\n" +
+                    "            recaptcharesponse = openurl(\"http://2captcha.com/in.php?key=\" + captchakey2 + \"&method=userrecaptcha&googlekey=\" + gkey)\n" +
+                    "            # \"http://2captcha.com/in.php?key={}&method=userrecaptcha&googlekey={}&pageurl={}\".format(captchakey2,gkey,url)\n" +
                     "        captchaid = recaptcharesponse[3:]\n" +
                     "        recaptcharesponse = \"CAPCHA_NOT_READY\"\n" +
                     "        elem = driver.find_element_by_class_name(\"g-recaptcha\")\n" +
@@ -355,7 +379,7 @@ public class GUI extends Application{
                     "    log(threadname,\"Account successfully created.\\n \\n\")\n" +
                     "    return True\n" +
                     "\n" +
-                    "create_account(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],60)";
+                    "create_account(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],sys.argv[7],180)";
 
             BufferedWriter out = new BufferedWriter(new FileWriter("accountcreate.py"));
             out.write(prg);
@@ -370,7 +394,10 @@ public class GUI extends Application{
         VBox vb = new VBox();
         vb.setSpacing(10);
         vb.setPadding(new Insets(15,15,15,15));
+        vb.setLayoutX(10);
+        vb.setLayoutY(10);
         vb.setAlignment(Pos.CENTER);
+        vb.setBackground(new Background(new BackgroundFill(Color.rgb(140,140,140,.5), CornerRadii.EMPTY, Insets.EMPTY)));
 
         Label plusMaillabel = new Label("Email:");
 
@@ -503,6 +530,27 @@ public class GUI extends Application{
             file[0] = fileChooser.showOpenDialog(primaryStage);
             if (file[0] != null) {
                 outputFile.setText(file[0].getAbsolutePath());
+            }
+        });
+
+        Label proxyLabel = new Label("Proxy File");
+
+        final TextField proxyFile = new TextField();
+        proxyFile.setPrefWidth(350);
+
+        HBox proxy = new HBox();
+        proxy.setAlignment(Pos.CENTER_RIGHT);
+        proxy.getChildren().addAll(proxyLabel, proxyFile);
+        proxy.setSpacing(10);
+
+        vb.getChildren().add(proxy);
+
+        File[] pFile = new File[1];
+
+        proxyFile.setOnMouseClicked(event -> {
+            pFile[0] = fileChooser.showOpenDialog(primaryStage);
+            if (pFile[0] != null) {
+                proxyFile.setText(pFile[0].getAbsolutePath());
             }
         });
 

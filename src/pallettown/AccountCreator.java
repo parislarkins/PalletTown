@@ -1,6 +1,8 @@
 package pallettown;
 
+import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -23,8 +25,12 @@ public class AccountCreator implements Runnable{
 
     static int success = 0;
 
+    private static ArrayList<PTCProxy> proxies = new ArrayList<>();
+
     public static boolean createAccounts(String user, String pass, String plus, String captcha) {
 
+        loadProxies();
+        //5 accounts per IP per 10 minutes
         username = user;
         password = pass;
         plusMail = plus;
@@ -35,7 +41,7 @@ public class AccountCreator implements Runnable{
         if(PalletTown.captchaKey.equals("")){
             System.out.println("manual captcha");
             for (int i = 0; i < PalletTown.count; i++) {
-                createAccount(i, Thread.currentThread().getName());
+                createAccount(i, Thread.currentThread().getName(), getProxy());
             }
         }else{
             AccountCreator accCreator = new AccountCreator();
@@ -63,6 +69,71 @@ public class AccountCreator implements Runnable{
         return true;
     }
 
+    synchronized
+    private static String getProxy() {
+        System.out.println("getting proxy for " + Thread.currentThread().getName());
+
+        PTCProxy shortestWait = null;
+
+        for (int i = 0; i < proxies.size(); i++) {
+            PTCProxy proxy = proxies.get(i);
+
+            System.out.println("    trying proxy " + i + ": " + proxy.IP());
+            if(shortestWait == null){
+                shortestWait = proxy;
+            }
+
+            if(!proxy.Started()){
+                System.out.println("    proxy unstarted, using..");
+                proxy.StartUsing();
+                return proxy.IP();
+            }
+
+            if(proxy.Usable()){
+                proxy.Use();
+                System.out.println("    proxy usable, using...");
+                return proxy.IP();
+            }else{
+                if(proxy.WaitTime() == 0){
+                    System.out.println("    proxy ready to be reset, updating queue and using...");
+                    proxy.UpdateQueue();
+                    proxy.Use();
+                    return proxy.IP();
+                }
+                System.out.println("    proxy unusable");
+                if(proxy.WaitTime() < shortestWait.WaitTime()){
+                    System.out.println("    proxy new shortest delay");
+                    shortestWait = proxy;
+                }
+            }
+        }
+
+        System.out.println("    no available proxies, waiting for next available proxy...");
+        try {
+            System.out.println("    shortest wait time: " + shortestWait.WaitTime());
+            Thread.sleep(shortestWait.WaitTime());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        shortestWait.UpdateQueue();
+        shortestWait.Use();
+        return shortestWait.IP();
+    }
+
+    private static void loadProxies() {
+
+        try {
+            Scanner in = new Scanner(PalletTown.proxyFile);
+
+            while(in.hasNext()){
+                String proxy = in.nextLine();
+                proxies.add(new PTCProxy(proxy));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void run() {
         int mytaskcount = 0;
@@ -70,7 +141,7 @@ public class AccountCreator implements Runnable{
         int accNum;
         while ((accNum = incAccNum()) < WORK_ITEMS) {
             System.out.println(Thread.currentThread().getName()+" making account "+ accNum);
-            createAccount(accNum,Thread.currentThread().getName());
+            createAccount(accNum,Thread.currentThread().getName(), getProxy());
             System.out.println(Thread.currentThread().getName() + "done making account " + accNum);
             mytaskcount++;
         }
@@ -88,7 +159,7 @@ public class AccountCreator implements Runnable{
         success++;
     }
 
-    private static void createAccount(int accNum, String name) {
+    private static void createAccount(int accNum, String name, String proxy) {
         String birthday = RandomDetails.randomBirthday();
 
         System.out.println("Making account #" + (accNum+1));
@@ -108,7 +179,7 @@ public class AccountCreator implements Runnable{
         System.out.println("  Password: " + password);
         System.out.println("  Email   : " + accMail);
 
-        boolean createAcc = createAccPy(accUser,password,accMail,birthday,captchaKey,name);
+        boolean createAcc = createAccPy(accUser,password,accMail,birthday,captchaKey,name, proxy);
 
         System.out.println(createAcc ? "Account " + accNum + " created succesfully" : "Account " + accNum + " failed");
 
@@ -129,7 +200,7 @@ public class AccountCreator implements Runnable{
 //        createAccPy("palletttrainer10","J@kolantern7","miminpari+pallettrainer10@hotmail.com","1957-1-1","5d579f38e793dc5b3d4905540a4215fa", name);
 //    }
 
-    private static boolean createAccPy(String username, String password, String email, String dob, String captchaKey, String name){
+    private static boolean createAccPy(String username, String password, String email, String dob, String captchaKey, String name, String proxy){
         try{
 
 //                    String.format("create_account(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",60)\n",username,password,email,dob,captchaKey);
@@ -161,7 +232,8 @@ public class AccountCreator implements Runnable{
                     "\""+email + "\"",
                     "\""+dob + "\"",
                     "\""+captchaKey + "\"",
-                    "\"" + name + "\""
+                    "\"" + name + "\"",
+                    "\"" + proxy + "\""
             };
 
             ProcessBuilder pb = new ProcessBuilder(commands);

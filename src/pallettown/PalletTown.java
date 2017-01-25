@@ -27,6 +27,7 @@ public class PalletTown {
     public static String gmailPass;
     public static boolean acceptTos;
     public static File outputFile;
+    public static File proxyFile;
     public static boolean debug;
 
     public static void Start(){
@@ -34,24 +35,24 @@ public class PalletTown {
 
         AccountCreator.success = 0;
 
-        if(!captchaKey.equals("")){
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("2Captcha Balance");
-            alert.setHeaderText(null);
-
-            ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
-            ButtonType no = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-            alert.getButtonTypes().setAll(yes, no);
-            alert.setContentText("Your 2Captcha balance is: " + checkBalance() + ".\n" +
-                                  "This run will cost approximately: " + (double)Math.round((count * 0.0009) * 1000d) / 1000d +
-                                  ".\nDo you wish to proceed?");
-            alert.showAndWait().ifPresent(rs -> {
-                if (rs == no) {
-                    System.out.println("cancel");
-                }
-            });
-        }
+//        if(!captchaKey.equals("")){
+//            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+//            alert.setTitle("2Captcha Balance");
+//            alert.setHeaderText(null);
+//
+//            ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+//            ButtonType no = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+//
+//            alert.getButtonTypes().setAll(yes, no);
+//            alert.setContentText("Your 2Captcha balance is: " + checkBalance() + ".\n" +
+//                                  "This run will cost approximately: " + (double)Math.round((count * 0.0009) * 1000d) / 1000d +
+//                                  ".\nDo you wish to proceed?");
+//            alert.showAndWait().ifPresent(rs -> {
+//                if (rs == no) {
+//                    System.out.println("cancel");
+//                }
+//            });
+//        }
 
         String verify = verifySettings();
 
@@ -192,7 +193,11 @@ public class PalletTown {
         TextField path = (TextField) output.getChildren().get(1);
         outputFile = path.getText().equals("") ? null : new File(path.getText());
 
-        CheckBox debugMode = (CheckBox) vb.getChildren().get(12);
+        HBox proxy = (HBox) vb.getChildren().get(11);
+        TextField proxyPath = (TextField) proxy.getChildren().get(1);
+        proxyFile = proxyPath.getText().equals("") ? null : new File(proxyPath.getText());
+
+        CheckBox debugMode = (CheckBox) vb.getChildren().get(13);
         debug = debugMode.isSelected();
 
     }
