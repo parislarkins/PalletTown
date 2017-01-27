@@ -10,6 +10,8 @@ public class PTCProxy {
 
     private String ip;
     private int usages = 0;
+    public static final int MAX_USES = 3;
+    public static final long RESET_TIME = 660000;
     private ArrayList<Long> startTimes = null;
 
 
@@ -46,7 +48,7 @@ public class PTCProxy {
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
         );
         System.out.println("proxy running time: " + time + ", usages: " + usages);
-        return (millis < 600000 && usages < 5);
+        return (millis < RESET_TIME && usages < MAX_USES);
     }
 
     public String IP(){
@@ -58,6 +60,6 @@ public class PTCProxy {
     }
 
     public long WaitTime() {
-        return Math.max(600000 - (System.currentTimeMillis() - startTimes.get(0)),0);
+        return Math.max(RESET_TIME - (System.currentTimeMillis() - startTimes.get(0)),0);
     }
 }

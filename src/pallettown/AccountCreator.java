@@ -166,20 +166,33 @@ public class AccountCreator implements Runnable{
 
         String accUser;
 
-        if(PalletTown.count > 1 && PalletTown.startNum == null)
-            accUser = PalletTown.userName + (accNum+1);
-        else if (PalletTown.count >= 1 && PalletTown.startNum != null)
-            accUser = PalletTown.userName + (PalletTown.startNum + accNum);
-        else
-            accUser = PalletTown.userName;
+        if(username == null){
+            System.out.println("no username specified, generating one");
+            accUser = RandomDetails.randomUsername();
+        }else{
+            if(PalletTown.count > 1 && PalletTown.startNum == null)
+                accUser = PalletTown.userName + (accNum+1);
+            else if (PalletTown.count >= 1 && PalletTown.startNum != null)
+                accUser = PalletTown.userName + (PalletTown.startNum + accNum);
+            else
+                accUser = PalletTown.userName;
+        }
+
+        String accPw;
+        if(password == null){
+            System.out.println("no password specified, generating one");
+            accPw = RandomDetails.randomPassword();
+        }else{
+            accPw = password;
+        }
 
         String accMail = plusMail.replace("@","+" + accUser + "@");
 
         System.out.println("  Username: " + accUser);
-        System.out.println("  Password: " + password);
+        System.out.println("  Password: " + accPw);
         System.out.println("  Email   : " + accMail);
 
-        boolean createAcc = createAccPy(accUser,password,accMail,birthday,captchaKey,name, proxy);
+        boolean createAcc = createAccPy(accUser,accPw,accMail,birthday,captchaKey,name, proxy);
 
         System.out.println(createAcc ? "Account " + accNum + " created succesfully" : "Account " + accNum + " failed");
 
@@ -188,7 +201,7 @@ public class AccountCreator implements Runnable{
 
         incSuccess();
         if(PalletTown.outputFile != null)
-            PalletTown.outputAppend(accUser+":"+password);
+            PalletTown.outputAppend("ptc," + accUser+","+accPw);
 
         if(PalletTown.acceptTos)
             TOSAccept.acceptTos(accUser,password,accMail);

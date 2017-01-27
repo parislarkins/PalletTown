@@ -113,16 +113,16 @@ public class PalletTown {
         if(plusMail.equals("") || !plusMail.contains("@") || plusMail.contains("gmail.com"))
             return "Check email is correct and not a gmail address and try again";
 
-        if(userName.equals(""))
-            return "Please enter a username";
-
-        if(!validatePass(password))
+//        if(userName.equals(""))
+//            return "Please enter a username";
+//
+        if(password != null && !validatePass(password))
             return "Invalid password.\nPassword must contain a symbol, number, and capital letter";
 
         if(count < 1)
             return "Please set count to at least 1";
 
-        if((startNum == null || startNum == 0) && count > 1)
+        if((startNum == null || startNum == 0) && count > 1 && userName != null)
             return "To create more than 1 account, specify a start number";
 
         if(autoVerify && (gmail.equals("") || gmailPass.equals("") || !gmail.contains("@gmail.com")))
@@ -131,8 +131,8 @@ public class PalletTown {
         return "valid";
     }
 
-    private static boolean validatePass(String password) {
-        Pattern pattern = Pattern.compile("((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!^~`&*(){}@#$%]).{6,20})");
+    public static boolean validatePass(String password) {
+        Pattern pattern = Pattern.compile("^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\\d]){1,})(?=(.*[\\W]){1,})(?!.*\\s).{8,}$");
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();
 }
@@ -157,11 +157,11 @@ public class PalletTown {
 
         HBox user = (HBox) vb.getChildren().get(1);
         TextField uname = (TextField) user.getChildren().get(1);
-        userName = uname.getText();
+        userName = uname.getText().equals("") ? null : uname.getText();
 
         HBox pass = (HBox) vb.getChildren().get(2);
         TextField pw = (TextField) pass.getChildren().get(1);
-        password = pw.getText();
+        password = pw.getText().equals("") ? null : pw.getText();
 
         HBox sn = (HBox) vb.getChildren().get(4);
         TextField s = (TextField) sn.getChildren().get(1);
