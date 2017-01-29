@@ -237,7 +237,8 @@ public class GUI extends Application{
                     "    else:\n" +
                     "        log(threadname,\"No 2captcha key\")\n" +
                     "\n" +
-                    "        if(platform.system() == \"Windows\"):\n" +
+//                    "        log(threadname, platform.system())\n" +
+                    "        if(platform.system() == \"Windows\" or platform.system() == \"Darwin\"):\n" +
                     "            chrome_options = webdriver.ChromeOptions()\n" +
                     "            #chrome_options.add_argument('--proxy-server=' + proxy)\n" +
                     "\n" +

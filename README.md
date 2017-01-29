@@ -57,7 +57,7 @@ Place chromedriver.exe in C:\Python27\Scripts (if you installed python to the de
 
 Download the latest PhantomJS from http://phantomjs.org/download.html.
 
-Open the zip. Inside the phantomjs folder, you'll find phantomjs.exe in the bin folder. Move phantomjs.exe to the same place as chromedriver.exe (C:\Python27\Scripts)
+Extract the zip. Inside the phantomjs folder, you'll find phantomjs.exe in the bin folder. Move phantomjs.exe to the same place as chromedriver.exe (C:\Python27\Scripts)
 
 ### Running Pallet Town
 
