@@ -18,7 +18,7 @@ public class AccountCreator implements Runnable{
     private static String username;
     private static String password;
     private static String plusMail;
-    private static String captchaKey;
+    private static String captchaKey = "";
 
     public static int WORK_ITEMS;
 
@@ -343,18 +343,28 @@ public class AccountCreator implements Runnable{
 //            PyObject result = someFunc.__call__(new PyString[] {new PyString(username),new PyString(password), new PyString(email), new PyString(dob), new PyString(captchaKey)});
 //            String realResult = (String) result.__tojava__(String.class);
 
+            if(captchaKey.isEmpty()) captchaKey = "null";
+
+            if(proxy.isEmpty()) proxy = "null";
+
             String[] commands = new String[] {
                     "python",
                     "accountcreate.py",
-                    "\""+username + "\"",
-                    "\""+password + "\"",
-                    "\""+email + "\"",
-                    "\""+dob + "\"",
-                    "\""+captchaKey + "\"",
-                    "\"" + name + "\"",
-                    "\"" + proxy + "\""
+                    username,
+                    password,
+                    email,
+                    dob,
+                    captchaKey,
+                    name,
+                    proxy
             };
 
+//            for (String command : commands) {
+//                System.out.println(command);
+//            }
+
+//            ProcessBuilder pb = new ProcessBuilder("python", "accountcreate.py " + username + " " + password + " " + email +
+//                    " " + dob + " \"\" " + name + " " + " \"\" ");
             ProcessBuilder pb = new ProcessBuilder(commands);
 
             pb.redirectErrorStream(true);

@@ -72,6 +72,7 @@ public class GUI extends Application{
                     "import random\n" +
                     "import datetime\n" +
                     "import urllib2\n" +
+                    "import platform\n" +
                     "\n" +
                     "from selenium import webdriver\n" +
                     "from selenium.webdriver.support.ui import WebDriverWait\n" +
@@ -93,6 +94,7 @@ public class GUI extends Application{
                     "    'https://club.pokemon.com/us/pokemon-trainer-club/parents/email',\n" +
                     "    # This initially seemed to be the proper success redirect\n" +
                     "    'https://club.pokemon.com/us/pokemon-trainer-club/sign-up/',\n" +
+                    "    'https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up'\n" +
                     "    # but experimentally it now seems to return to the sign-up, but still registers\n" +
                     ")\n" +
                     "\n" +
@@ -182,20 +184,21 @@ public class GUI extends Application{
                     "\n" +
                     "def _validate_response(driver):\n" +
                     "    url = driver.current_url\n" +
+                    "    log(\"RESPONSE_VALIDATOR\",url)\n" +
                     "    if url in SUCCESS_URLS:\n" +
                     "        return True\n" +
                     "    elif url == DUPE_EMAIL_URL:\n" +
-                    "        log (threadname,\"Email already in use\")\n" +
+                    "        log (\"RESPONSE_VALIDATOR\",\"Email already in use\")\n" +
                     "        raise PTCInvalidEmailException(\"Email already in use.\")\n" +
                     "    elif url == BAD_DATA_URL:\n" +
                     "        if \"Enter a valid email address.\" in driver.page_source:\n" +
-                    "            log (threadname,\"Invalid Email used\")\n" +
+                    "            log (\"RESPONSE_VALIDATOR\",\"Invalid Email used\")\n" +
                     "            raise PTCInvalidEmailException(\"Invalid email.\")\n" +
                     "        else:\n" +
-                    "            log (threadname,\"Username already in use\")\n" +
+                    "            log (\"RESPONSE_VALIDATOR\",\"Username already in use\")\n" +
                     "            raise PTCInvalidNameException(\"Username already in use.\")\n" +
                     "    else:\n" +
-                    "        log (threadname,\"Some other error returned by Niantic\")\n" +
+                    "        log (\"RESPONSE_VALIDATOR\",\"Some other error returned by Niantic\")\n" +
                     "        raise PTCException(\"Generic failure. User was not created.\")\n" +
                     "\n" +
                     "def create_account(username, password, email, birthday, captchakey2, threadname, proxy, captchatimeout):\n" +
@@ -203,8 +206,10 @@ public class GUI extends Application{
                     "    log(threadname,\" initializing..\")\n" +
                     "    log(threadname,\"Attempting to create user {user}:{pw}. Opening browser...\".format(user=username, pw=password))\n" +
                     "    \n" +
-                    "    if(captchakey2 == \"\"):\n" +
+                    "    if(captchakey2 == \"null\"):\n" +
                     "        captchakey2 = None\n" +
+                    "    if(proxy == \"null\"):\n" +
+                    "        proxy = None\n" +
                     "\n" +
                     "    if captchakey2 != None:\n" +
                     "        log(threadname,\"2captcha key\")\n" +
@@ -212,7 +217,7 @@ public class GUI extends Application{
                     "        dcap[\"phantomjs.page.settings.userAgent\"] = user_agent\n" +
                     "\n" +
                     "        print(proxy)\n" +
-                    "        if proxy != \"\":\n" +
+                    "        if proxy != None:\n" +
                     "            serv_args = [\n" +
                     "                '--proxy=https://' + proxy,\n" +
                     "                '--proxy-type=https',\n" +
@@ -232,15 +237,19 @@ public class GUI extends Application{
                     "    else:\n" +
                     "        log(threadname,\"No 2captcha key\")\n" +
                     "\n" +
-                    "        chrome_options = webdriver.ChromeOptions()\n" +
-                    "        #chrome_options.add_argument('--proxy-server=' + proxy)\n" +
+                    "        if(platform.system() == \"Windows\"):\n" +
+                    "            chrome_options = webdriver.ChromeOptions()\n" +
+                    "            #chrome_options.add_argument('--proxy-server=' + proxy)\n" +
                     "\n" +
-                    "        driver = webdriver.Chrome(chrome_options=chrome_options)\n" +
-                    "        driver.set_window_size(600, 600)\n" +
-                    "        #testing\n" +
-                    "        #driver.get(\"http://whatismyipaddress.com\")\n" +
-                    "        #log(threadname,\"proxy: \" + proxy)\n" +
-                    "        #return True\n" +
+                    "            driver = webdriver.Chrome(chrome_options=chrome_options)\n" +
+                    "            driver.set_window_size(600, 600)\n" +
+                    "            #testing\n" +
+                    "            #driver.get(\"http://whatismyipaddress.com\")\n" +
+                    "            #log(threadname,\"proxy: \" + proxy)\n" +
+                    "            #return True\n" +
+                    "        else:\n" +
+                    "            driver = webdriver.Firefox()\n" +
+                    "            driver.set_window_size(600,600)\n" +
                     "\n" +
                     "    # Input age: 1992-01-08\n" +
                     "    log(threadname,\"Step 1: Verifying age using birthday: {}\".format(birthday))\n" +
@@ -277,8 +286,11 @@ public class GUI extends Application{
                     "\n" +
                     "    # Create account page\n" +
                     "    log(threadname,\"Step 2: Entering account details\")\n" +
-                    "    assert driver.current_url == \"{}/parents/sign-up\".format(BASE_URL)\n" +
+                    "    #assert driver.current_url == \"{}/parents/sign-up\".format(BASE_URL)\n" +
+                    "    log(threadname,\"{}/parents/sign-up\".format(BASE_URL))\n" +
+                    "    log(threadname,driver.current_url)\n" +
                     "\n" +
+                    "    driver.implicitly_wait(10)\n" +
                     "    user = driver.find_element_by_name(\"username\")\n" +
                     "    user.clear()\n" +
                     "    user.send_keys(username)\n" +
@@ -372,11 +384,10 @@ public class GUI extends Application{
                     "        log (threadname,\"trying to validate response\")\n" +
                     "        _validate_response(driver)\n" +
                     "        log (threadname,\"validated response\")\n" +
-                    "    except:\n" +
+                    "    except PTCException:\n" +
                     "        log(threadname,\"Failed to create user: {}\".format(username) + \"exiting...\")\n" +
                     "        driver.close()\n" +
                     "        driver.quit()\n" +
-                    "        raise PTCInvalidNameException(\"failed to create user\")\n" +
                     "        log(threadname, \"threw failed to create user exception, terminate\")\n" +
                     "        return False\n" +
                     "\n" +
