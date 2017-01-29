@@ -10,7 +10,7 @@ public class PTCProxy {
 
     private String ip;
     private int usages = 0;
-    public static final int MAX_USES = 3;
+    public static final int MAX_USES = 5;
     public static final long RESET_TIME = 660000;
     private ArrayList<Long> startTimes = null;
 
@@ -19,20 +19,34 @@ public class PTCProxy {
         this.ip = ip;
     }
 
-    public void StartUsing(){
-        startTimes = new ArrayList<>();
-        Use();
-    }
+//    public void StartUsing(){
+//        startTimes = new ArrayList<>();
+//        Use();
+//    }
 
     public void Use(){
-        startTimes.add(usages,System.currentTimeMillis());
+        if(startTimes == null){
+            startTimes = new ArrayList<>();
+        }
+        startTimes.add(System.currentTimeMillis());
+    }
+
+    public void ReserveUse(){
         usages++;
     }
 
     public void UpdateQueue(){
         usages--;
-        startTimes.remove(usages);
-        startTimes.forEach(aLong -> System.out.println("    start time: " + aLong));
+        startTimes.remove(0);
+        startTimes.forEach(aLong -> {
+            long millis = startTimes.get(0) - System.currentTimeMillis();
+            String time = String.format("%02d min, %02d sec",
+                    TimeUnit.MILLISECONDS.toMinutes(millis),
+                    TimeUnit.MILLISECONDS.toSeconds(millis) -
+                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
+            );
+            System.out.println("    start time: " + time + " ago");
+        });
     }
 
     public boolean Started(){
@@ -61,5 +75,10 @@ public class PTCProxy {
 
     public long WaitTime() {
         return Math.max(RESET_TIME - (System.currentTimeMillis() - startTimes.get(0)),0);
+    }
+
+    public void Reset() {
+        startTimes = null;
+        usages = 0;
     }
 }

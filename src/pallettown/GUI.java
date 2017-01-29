@@ -218,13 +218,13 @@ public class GUI extends Application{
                     "                '--proxy-type=https',\n" +
                     "            ]\n" +
                     "            driver = webdriver.PhantomJS(desired_capabilities=dcap,service_args=serv_args)\n" +
-                    "            driver.get(\"http://whatismyip.org/\")\n" +
-                    "            log(threadname,\"proxy: \" + proxy)\n" +
-                    "            log(threadname, driver.current_url)\n" +
-                    "            elem = driver.find_element_by_tag_name(\"span\")\n" +
-                    "            log(threadname, \"span text: \" + elem.text)\n" +
-                    "            if(elem.text == \"180.200.145.4\"):\n" +
-                    "                return True\n" +
+                    "            #driver.get(\"http://whatismyip.org/\")\n" +
+                    "            #log(threadname,\"proxy: \" + proxy)\n" +
+                    "            #log(threadname, driver.current_url)\n" +
+                    "            #elem = driver.find_element_by_tag_name(\"span\")\n" +
+                    "            #log(threadname, \"span text: \" + elem.text)\n" +
+                    "            #if(elem.text == \"180.200.145.4\"):\n" +
+                    "            #    return True\n" +
                     "            # return True\n" +
                     "        else:\n" +
                     "            driver = webdriver.PhantomJS(desired_capabilities=dcap)\n" +
@@ -233,14 +233,14 @@ public class GUI extends Application{
                     "        log(threadname,\"No 2captcha key\")\n" +
                     "\n" +
                     "        chrome_options = webdriver.ChromeOptions()\n" +
-                    "        chrome_options.add_argument('--proxy-server=' + proxy)\n" +
+                    "        #chrome_options.add_argument('--proxy-server=' + proxy)\n" +
                     "\n" +
                     "        driver = webdriver.Chrome(chrome_options=chrome_options)\n" +
                     "        driver.set_window_size(600, 600)\n" +
                     "        #testing\n" +
-                    "        driver.get(\"http://whatismyipaddress.com\")\n" +
-                    "        log(threadname,\"proxy: \" + proxy)\n" +
-                    "        return True\n" +
+                    "        #driver.get(\"http://whatismyipaddress.com\")\n" +
+                    "        #log(threadname,\"proxy: \" + proxy)\n" +
+                    "        #return True\n" +
                     "\n" +
                     "    # Input age: 1992-01-08\n" +
                     "    log(threadname,\"Step 1: Verifying age using birthday: {}\".format(birthday))\n" +
@@ -248,12 +248,14 @@ public class GUI extends Application{
                     "        driver.get(\"{}/sign-up/\".format(BASE_URL))\n" +
                     "        log(threadname,\"Driver current url: \" + driver.current_url)\n" +
                     "    except Exception as e:\n" +
-                    "        log(threadname, \"unkown Error verifying age, terminating\")\n" +
+                    "        log(threadname, \"unknown Error verifying age, terminating\")\n" +
+                    "        driver.close()\n" +
                     "        driver.quit()\n" +
                     "        return False\n" +
                     "\n" +
                     "    if driver.current_url != \"{}/sign-up/\".format(BASE_URL):\n" +
                     "        log(threadname,\"Driver url wrong, exiting...\")\n" +
+                    "        driver.close()\n" +
                     "        driver.quit()\n" +
                     "        return False\n" +
                     "        \n" +
@@ -314,6 +316,7 @@ public class GUI extends Application{
                     "            time.sleep(1)\n" +
                     "        except TimeoutException, err:\n" +
                     "            log(threadname,\"Timed out while manually solving captcha\")\n" +
+                    "            driver.close()\n" +
                     "            driver.quit()\n" +
                     "            return False\n" +
                     "    else:\n" +
@@ -339,6 +342,7 @@ public class GUI extends Application{
                     "            elapsedtime = int(time.time()) - start_time\n" +
                     "            if elapsedtime > captchatimeout:\n" +
                     "                log(threadname,\"Captcha timeout reached. Exiting.\")\n" +
+                    "                driver.close()\n" +
                     "                driver.quit()\n" +
                     "                timedout = True\n" +
                     "                return True\n" +
@@ -360,6 +364,7 @@ public class GUI extends Application{
                     "        log (threadname,\"submitted\")\n" +
                     "    except StaleElementReferenceException:\n" +
                     "        log(threadname,\"Error StaleElementReferenceException!\")\n" +
+                    "        driver.close()\n" +
                     "        driver.quit()\n" +
                     "        return False\n" +
                     "\n" +
@@ -369,11 +374,13 @@ public class GUI extends Application{
                     "        log (threadname,\"validated response\")\n" +
                     "    except:\n" +
                     "        log(threadname,\"Failed to create user: {}\".format(username) + \"exiting...\")\n" +
+                    "        driver.close()\n" +
                     "        driver.quit()\n" +
                     "        raise PTCInvalidNameException(\"failed to create user\")\n" +
                     "        log(threadname, \"threw failed to create user exception, terminate\")\n" +
                     "        return False\n" +
                     "\n" +
+                    "    driver.close()\n" +
                     "    driver.quit()\n" +
                     "    log(threadname,\"Closed driver\")\n" +
                     "    log(threadname,\"Account successfully created.\\n \\n\")\n" +
