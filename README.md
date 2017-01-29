@@ -67,7 +67,7 @@ Starting it from CMD with:
 
 `java -jar PalletTown.jar`
 
-Or simple double clicking the .jar file in Windows Explorer.
+Or simply double clicking the .jar file in Windows Explorer.
 
 Starting it from CMD will give you a log of what's happening in the program to let you know it's still running or if anything goes wrong.
 Currently without running it from CMD the program will just freeze until it has completed account creation.
