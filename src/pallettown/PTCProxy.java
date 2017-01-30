@@ -56,11 +56,7 @@ public class PTCProxy {
     public boolean Usable(){
         System.out.println("checking if proxy is usable");
         long millis = System.currentTimeMillis() - startTimes.get(0);
-        String time = String.format("%02d min, %02d sec",
-                TimeUnit.MILLISECONDS.toMinutes(millis),
-                TimeUnit.MILLISECONDS.toSeconds(millis) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
-        );
+        String time = PalletTown.millisToTime(millis);
         System.out.println("proxy running time: " + time + ", usages: " + usages);
         return (millis < RESET_TIME && usages < MAX_USES);
     }

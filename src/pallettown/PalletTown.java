@@ -5,6 +5,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.io.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -214,7 +215,13 @@ public class PalletTown {
 
         CheckBox debugMode = (CheckBox) vb.getChildren().get(13);
         debug = debugMode.isSelected();
-
     }
 
+    public static String millisToTime(long millis){
+        return String.format("%02d min, %02d sec",
+                TimeUnit.MILLISECONDS.toMinutes(millis),
+                TimeUnit.MILLISECONDS.toSeconds(millis) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
+        );
+    }
 }

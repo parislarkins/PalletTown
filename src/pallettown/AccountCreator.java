@@ -1,5 +1,7 @@
 package pallettown;
 
+import javafx.scene.control.Alert;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -43,16 +45,16 @@ public class AccountCreator implements Runnable{
 
         startTime = System.currentTimeMillis();
 
+        loadProxies();
+
         if(PalletTown.captchaKey.equals("")){
             System.out.println("manual captcha");
             for (int i = 0; i < PalletTown.count; i++) {
-//                PTCProxy proxy = getProxy();
+                PTCProxy proxy = getProxy();
                 createAccount(i, Thread.currentThread().getName(), "");
-//                proxy.Use();
+                proxy.Use();
             }
         }else{
-
-            loadProxies();
 
             AccountCreator accCreator = new AccountCreator();
             Thread[] threads = new Thread[THREADS];
@@ -118,9 +120,16 @@ public class AccountCreator implements Runnable{
             }
         }
 
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Waiting...");
+        alert.setHeaderText(null);
+        alert.setContentText("Waiting " + PalletTown.millisToTime(shortestWait.WaitTime()) + " until IP restriction is lifted");
+        alert.showAndWait();
+
         System.out.println("    no available proxies, waiting for next available proxy...");
         try {
-            System.out.println("    shortest wait time: " + shortestWait.WaitTime());
+            System.out.println("    shortest wait time: " + PalletTown.millisToTime(shortestWait.WaitTime()));
             Thread.sleep(shortestWait.WaitTime());
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -128,93 +137,6 @@ public class AccountCreator implements Runnable{
         shortestWait.UpdateQueue();
         shortestWait.ReserveUse();
         return shortestWait;
-//        System.out.println("getting proxy for " + Thread.currentThread().getName());
-//
-//        PTCProxy shortestWait = null;
-//
-//        for (int i = 0; i < proxies.size(); i++) {
-//            PTCProxy proxy = proxies.get(i);
-//
-//            System.out.println("    trying proxy " + i + ": " + proxy.IP());
-//            if(shortestWait == null){
-//                shortestWait = proxy;
-//            }
-//
-//            if(!proxy.Started()){
-//                System.out.println("    proxy unstarted, using..");
-//                proxy.StartUsing();
-//                return proxy.IP();
-//            }
-//
-//            if(proxy.Usable()){
-//                proxy.Use();
-//                System.out.println("    proxy usable, using...");
-//                return proxy.IP();
-//            }else{
-////                if(proxy.WaitTime() == 0){
-////                    System.out.println("    proxy ready to be reset, updating queue and using...");
-////                    proxy.UpdateQueue();
-////                    proxy.Use();
-////                    return proxy.IP();
-////                }
-//                System.out.println("    proxy unusable");
-////                if(proxy.WaitTime() < shortestWait.WaitTime()){
-////                    System.out.println("    proxy new shortest delay");
-////                    shortestWait = proxy;
-////                }
-//            }
-//        }
-//
-//        long endTime = System.currentTimeMillis();
-//
-//        long millis = endTime - startTime;
-//        String time = String.format("%02d min, %02d sec",
-//                TimeUnit.MILLISECONDS.toMinutes(millis),
-//                TimeUnit.MILLISECONDS.toSeconds(millis) -
-//                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
-//        );
-//
-//        System.out.println("    All proxies unavailable. It took " + time + " to use all proxies.");
-//
-////        millis = PTCProxy.RESET_TIME - millis + 60000;
-//
-//        millis = PTCProxy.RESET_TIME + 30000;
-//        time = String.format("%02d min, %02d sec",
-//                TimeUnit.MILLISECONDS.toMinutes(millis),
-//                TimeUnit.MILLISECONDS.toSeconds(millis) -
-//                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
-//        );
-//        System.out.println("    Waiting " + time + " before resuming account creation");
-//
-//        String proxy = "";
-//        try {
-//            Thread.sleep(millis);
-//
-//            startTime = System.currentTimeMillis();
-//            System.out.println("    Done waiting, resetting all proxies");
-//            for (PTCProxy px : proxies) {
-//                px.Reset();
-//            }
-//
-//            proxy = getProxy();
-//
-//            System.out.println("    Done, getting new proxy: " + proxy);
-//
-//            return proxy;
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-////        System.out.println("    no available proxies, waiting for next available proxy...");
-////        try {
-////            System.out.println("    shortest wait time: " + shortestWait.WaitTime());
-////            Thread.sleep(shortestWait.WaitTime());
-////        } catch (InterruptedException e) {
-////            e.printStackTrace();
-////        }
-////        shortestWait.UpdateQueue();
-////        shortestWait.Use();
-//        return proxy;
     }
 
     private static void loadProxies() {

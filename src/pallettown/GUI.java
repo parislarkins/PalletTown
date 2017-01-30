@@ -101,6 +101,7 @@ public class GUI extends Application{
                     "# As both seem to work, we'll check against both success destinations until I have I better idea for how to check success\n" +
                     "DUPE_EMAIL_URL = 'https://club.pokemon.com/us/pokemon-trainer-club/forgot-password?msg=users.email.exists'\n" +
                     "BAD_DATA_URL = 'https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up'\n" +
+                    "RATE_LIMIT_URL = 'https://club.pokemon.com/us/pokemon-trainer-club/sign-up/?rate_limit_exceeded=True'\n" +
                     "\n" +
                     "logfile = \"pallettown.log\"\n" +
                     "\n" +
@@ -118,6 +119,7 @@ public class GUI extends Application{
                     "    'PTCInvalidEmailException',\n" +
                     "    'PTCInvalidPasswordException',\n" +
                     "    'PTCInvalidBirthdayException',\n" +
+                    "    'PTCRateLimitExceededException',\n" +
                     "    'PTCTwocaptchaException'\n" +
                     "]\n" +
                     "\n" +
@@ -148,6 +150,10 @@ public class GUI extends Application{
                     "\n" +
                     "class PTCInvalidBirthdayException(PTCException):\n" +
                     "    \"\"\"Birthday invalid\"\"\"\n" +
+                    "    pass\n" +
+                    "\n" +
+                    "class PTCRateLimitExceededException(PTCException):\n" +
+                    "    \"\"\"5 accounts per IP per 10 minutes limit exceeded\"\"\"\n" +
                     "    pass\n" +
                     "\n" +
                     "class PTCTwocaptchaException(PTCException):\n" +
@@ -197,6 +203,9 @@ public class GUI extends Application{
                     "        else:\n" +
                     "            log (\"RESPONSE_VALIDATOR\",\"Username already in use\")\n" +
                     "            raise PTCInvalidNameException(\"Username already in use.\")\n" +
+                    "    elif url == RATE_LIMIT_URL:\n" +
+                    "        log(\"RESPONSE_VALIDATOR\",\"Account creation IP limit exceeded\")\n" +
+                    "        raise PTCRateLimitExceededException(\"Account creation IP limit exceeded\")\n" +
                     "    else:\n" +
                     "        log (\"RESPONSE_VALIDATOR\",\"Some other error returned by Niantic\")\n" +
                     "        raise PTCException(\"Generic failure. User was not created.\")\n" +
