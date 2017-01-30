@@ -273,7 +273,7 @@ public class AccountCreator implements Runnable{
         String accUser;
 
         if(username == null){
-            System.out.println("no username specified, generating one");
+//            System.out.println("no username specified, generating one");
             accUser = RandomDetails.randomUsername();
         }else{
             if(PalletTown.count > 1 && PalletTown.startNum == null)
@@ -286,7 +286,7 @@ public class AccountCreator implements Runnable{
 
         String accPw;
         if(password == null){
-            System.out.println("no password specified, generating one");
+//            System.out.println("no password specified, generating one");
             accPw = RandomDetails.randomPassword();
         }else{
             accPw = password;

@@ -238,25 +238,8 @@ public class GUI extends Application{
                     "        log(threadname,\"No 2captcha key\")\n" +
                     "\n" +
 //                    "        log(threadname, platform.system())\n" +
-                    "        if(platform.system() == \"Windows\" or platform.system() == \"Darwin\"):\n" +
-                    "            chrome_options = webdriver.ChromeOptions()\n" +
-                    "            #chrome_options.add_argument('--proxy-server=' + proxy)\n" +
-                    "\n" +
-                    "            driver = webdriver.Chrome(chrome_options=chrome_options)\n" +
-                    "            driver.set_window_size(600, 600)\n" +
-                    "            #testing\n" +
-                    "            #driver.get(\"http://whatismyipaddress.com\")\n" +
-                    "            #log(threadname,\"proxy: \" + proxy)\n" +
-                    "            #return True\n" +
-                    "        else:\n" +
-                    "            driver = webdriver.Firefox()\n" +
-                    "            driver.set_window_size(600,600)\n" +
-                    "\n" +
-                    "    # Input age: 1992-01-08\n" +
-                    "    log(threadname,\"Step 1: Verifying age using birthday: {}\".format(birthday))\n" +
-                    "    try:\n" +
-                    "        driver.get(\"{}/sign-up/\".format(BASE_URL))\n" +
-                    "        log(threadname,\"Driver current url: \" + driver.current_url)\n" +
+                    "        if(platform.system() == \"Windows\" or pl" +
+                    "_url)\n" +
                     "    except Exception as e:\n" +
                     "        log(threadname, \"unknown Error verifying age, terminating\")\n" +
                     "        driver.close()\n" +
@@ -519,6 +502,7 @@ public class GUI extends Application{
         vb.getChildren().add(gmPw);
 
         CheckBox acceptTos = new CheckBox("Accept account TOS");
+        acceptTos.setDisable(true);
         vb.getChildren().add(acceptTos);
 
         ArrayList<String> extentions = new ArrayList<>();

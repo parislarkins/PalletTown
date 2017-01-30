@@ -88,11 +88,4 @@ public class RandomDetails {
         return start + (int)Math.round(Math.random() * (end - start));
     }
 
-    public static void main(String[] args) {
-        for (int i = 0; i < 5; i++) {
-            String pw = randomPassword();
-            System.out.println(randomUsername() + ":" + pw);
-            System.out.println(PalletTown.validatePass(pw));
-        }
-    }
 }
