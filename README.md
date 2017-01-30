@@ -11,7 +11,8 @@ You can download the latest release [here](https://github.com/novskey/PalletTown
 2. [Usage](#usage)
     1. [Basic Examples](#basic-examples)
 3. [FAQ](#faq)
-4. [Wiki](http://pallettown.readthedocs.io/)
+4. [Discord](https://discord.gg/RgWSqyU)
+5. [Wiki - WIP](http://pallettown.readthedocs.io/)
 
 ### Prerequisites
 
@@ -245,6 +246,8 @@ All you have to do is wait for the captcha to appear, and solve it.
 ![Create 10 accounts with random details, using 2Captcha, automatic Gmail verification, save to file, and use proxy list](images/10-random-2captcha-gmailav-proxies-save.jpg)
 
 ## <a name="faq"></a> FAQ
+
+For more help, please ask on the [discord](https://discord.gg/RgWSqyU).
 
 #### <a name="faq-plusmail"></a> What is a "plusmail compatible email address"?
 
