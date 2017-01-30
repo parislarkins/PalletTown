@@ -505,13 +505,14 @@ public class GUI extends Application{
         acceptTos.setDisable(true);
         vb.getChildren().add(acceptTos);
 
-        ArrayList<String> extentions = new ArrayList<>();
-        extentions.add("*.txt");
+        ArrayList<String> extensions = new ArrayList<>();
+        extensions.add("*.txt");
+        extensions.add("*.csv");
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select output file");
         fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Text File", extentions)
+                new FileChooser.ExtensionFilter("Text File", extensions)
         );
         fileChooser.setSelectedExtensionFilter(fileChooser.getExtensionFilters().get(0));
 
@@ -528,6 +529,7 @@ public class GUI extends Application{
         vb.getChildren().add(output);
 
         File[] file = new File[1];
+
 
         outputFile.setOnMouseClicked(event -> {
             file[0] = fileChooser.showOpenDialog(primaryStage);
@@ -551,6 +553,12 @@ public class GUI extends Application{
         File[] pFile = new File[1];
 
         proxyFile.setOnMouseClicked(event -> {
+            fileChooser.setTitle("Select proxy file");
+            fileChooser.getExtensionFilters().removeAll();
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Text File","*.txt")
+            );
+            fileChooser.setSelectedExtensionFilter(fileChooser.getExtensionFilters().get(1));
             pFile[0] = fileChooser.showOpenDialog(primaryStage);
             if (pFile[0] != null) {
                 proxyFile.setText(pFile[0].getAbsolutePath());
