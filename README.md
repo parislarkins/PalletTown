@@ -1,6 +1,6 @@
 # Pallet Town
 
-Pallet Town is a Java tool for creating Pokemon Trainer Club accounts.
+Pallet Town is a Java tool for creating Pokemon Trainer Club accounts, based on [Pikaptcha](https://github.com/sriyegna/Pikaptcha).
 
 You can download the latest release [here](https://github.com/novskey/PalletTown/releases) (Just download the .jar file) 
 
