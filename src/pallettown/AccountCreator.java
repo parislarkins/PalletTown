@@ -220,6 +220,13 @@ public class AccountCreator implements Runnable{
 
     private static void loadProxies() {
 
+        if(PalletTown.proxyFile == null){
+            System.out.println("no proxy file specified");
+
+            proxies.add(new PTCProxy("null"));
+            return;
+        }
+
         try {
             Scanner in = new Scanner(PalletTown.proxyFile);
 
@@ -227,11 +234,8 @@ public class AccountCreator implements Runnable{
                 String proxy = in.nextLine();
                 proxies.add(new PTCProxy(proxy));
             }
-        } catch (NullPointerException e){
-            System.out.println("no proxy file specified");
-
-            proxies.add(new PTCProxy("null"));
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
     }
 

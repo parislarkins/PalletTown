@@ -237,9 +237,20 @@ public class GUI extends Application{
                     "    else:\n" +
                     "        log(threadname,\"No 2captcha key\")\n" +
                     "\n" +
-//                    "        log(threadname, platform.system())\n" +
-                    "        if(platform.system() == \"Windows\" or pl" +
-                    "_url)\n" +
+                    "        if(platform.system() == \"Windows\" or platform.system() == \"Darwin\"):\n" +
+                    "            driver = webdriver.Chrome()\n" +
+                    "        else:\n" +
+                    "            driver = webdriver.Firefox()\n" +
+                    "\n" +
+                    "    driver.set_window_size(600, 600)\n" +
+                    "\n" +
+                    "    try:\n" +
+                    "        # Input age: 1992-01-08\n" +
+                    "        print(\"Step 1: Verifying age using birthday: {}\".format(birthday))\n" +
+                    "        driver.get(\"{}/sign-up/\".format(BASE_URL))\n" +
+                    "        assert driver.current_url == \"{}/sign-up/\".format(BASE_URL)\n" +
+                    "        elem = driver.find_element_by_name(\"dob\")\n" +
+                    "\n" +
                     "    except Exception as e:\n" +
                     "        log(threadname, \"unknown Error verifying age, terminating\")\n" +
                     "        driver.close()\n" +
