@@ -4,10 +4,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -99,6 +96,7 @@ public class PalletTown {
     static void outputAppend(String s) {
         // append to end of file
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile,true))) {
+            if(!newLineExists(outputFile)) bw.newLine();
             bw.write(s);
             bw.newLine();
             bw.flush();
@@ -106,6 +104,23 @@ public class PalletTown {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    static boolean newLineExists(File file) throws IOException {
+        RandomAccessFile fileHandler = new RandomAccessFile(file, "r");
+        long fileLength = fileHandler.length() - 1;
+        if (fileLength < 0) {
+            fileHandler.close();
+            return true;
+        }
+        fileHandler.seek(fileLength);
+        byte readByte = fileHandler.readByte();
+        fileHandler.close();
+
+        if (readByte == 0xA || readByte == 0xD) {
+            return true;
+        }
+        return false;
     }
 
     private static String verifySettings() {

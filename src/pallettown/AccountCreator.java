@@ -1,7 +1,6 @@
 package pallettown;
 
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
@@ -222,7 +221,6 @@ public class AccountCreator implements Runnable{
 
         if(PalletTown.proxyFile == null){
             System.out.println("no proxy file specified");
-
             proxies.add(new PTCProxy("null"));
             return;
         }
@@ -234,10 +232,13 @@ public class AccountCreator implements Runnable{
                 String proxy = in.nextLine();
                 proxies.add(new PTCProxy(proxy));
             }
+
+            proxies.add(new PTCProxy("null"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
+
 
     @Override
     public void run() {
