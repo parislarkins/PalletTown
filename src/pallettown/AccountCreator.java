@@ -51,7 +51,7 @@ public class AccountCreator implements Runnable{
             System.out.println("manual captcha");
             for (int i = 0; i < PalletTown.count; i++) {
                 PTCProxy proxy = getProxy();
-                createAccount(i, Thread.currentThread().getName(), "");
+                createAccount(i, Thread.currentThread().getName(), proxy.IP());
                 proxy.Use();
             }
         }else{
