@@ -223,12 +223,15 @@ public class AccountCreator implements Runnable{
         try {
             Scanner in = new Scanner(PalletTown.proxyFile);
 
-            while(in.hasNext()){
+            while (in.hasNext()) {
                 String proxy = in.nextLine();
                 proxies.add(new PTCProxy(proxy));
             }
+        } catch (NullPointerException e){
+            System.out.println("no proxy file specified");
+
+            proxies.add(new PTCProxy("null"));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
         }
     }
 

@@ -170,7 +170,7 @@ For more detailed documentation, please visit the [wiki](http://pallettown.readt
 
 #### Create a single account with random details with manual captcha
 
-- Enter any email address that is plusmail compatible into the Email field. (If you aren't sure, check the FAQ [here](#plusmail))
+- Enter any email address that is plusmail compatible into the Email field. (If you aren't sure, check the FAQ [here](#faq-plusmail))
 - Click Create Accounts
 
 Username, password, and date of birth will be randomly generated and entered for you.
@@ -180,7 +180,7 @@ All you have to do is wait for the captcha to appear, and solve it.
 
 #### Create 5 accounts with random details with manual captcha, and save the usernames/passwords to a text file
 
-- Enter a plusmail compatible email address in the Email field. (See [the FAQ](#plusmail) if you're unsure)
+- Enter a plusmail compatible email address in the Email field. (See [the FAQ](#faq-plusmail) if you're unsure)
 - Enter the number 5 into the Number of accounts field.
 - Click the Output File field, which will open up a file browser (It may take a while on some systems)
 - Select your output file
@@ -190,7 +190,7 @@ All you have to do is wait for the captcha to appear, and solve it.
 
 #### Create 10 accounts with random details with 2captcha and a proxy list, and save the details to a file
 
-- Enter a plusmail compatible email address in the Email field. (See [the FAQ](#plusmail) if you're unsure)
+- Enter a plusmail compatible email address in the Email field. (See [the FAQ](#faq-plusmail) if you're unsure)
 - Enter the number 10 into the Number of accounts field.
 - Enter your 2Captcha key into the 2Captcha Key field.
 - Click the Output File field, which will open up a file browser (It may take a while on some systems)
@@ -207,7 +207,7 @@ All you have to do is wait for the captcha to appear, and solve it.
 
 #### Create 5 numbered accounts (eg: user1,user2,user3) with a specific username and password, with manual captcha, and save the details to a file
 
-- Enter a plusmail compatible email address in the Email field. (See [the FAQ](#plusmail) if you're unsure)
+- Enter a plusmail compatible email address in the Email field. (See [the FAQ](#faq-plusmail) if you're unsure)
 - Enter the username you want to use into the Username field.
 - Enter the password you want to use into the Password field. (It must contain a capital letter, number, and symbol)
 - Enter the number 5 into the Number of accounts field.
@@ -226,7 +226,7 @@ All you have to do is wait for the captcha to appear, and solve it.
 
 #### Create 10 accounts with random details, using 2Captcha, automatic Gmail verification, save to file, and use proxy list
 
-- Enter a plusmail compatible email address in the Email field. (See [the FAQ](#plusmail) if you're unsure)
+- Enter a plusmail compatible email address in the Email field. (See [the FAQ](#faq-plusmail) if you're unsure)
   **Note: The email address you enter here must be setup to forward/redirect to the Gmail account you intend to use. See [here](#hotmail-forwarding) for how to set it up.**
 - Enter the number 10 into the Number of accounts field.
 - Enter your 2Captcha key into the 2Captcha Key field.
