@@ -57,19 +57,19 @@ public class AccountCreator implements Runnable{
         }else{
 
             AccountCreator accCreator = new AccountCreator();
-            Thread[] threads = new Thread[THREADS];
+            Thread[] threads = new Thread[PalletTown.threads];
 
-            for (int i = 0; i < THREADS; i++) {
+            for (int i = 0; i < PalletTown.threads; i++) {
                 threads[i] = new Thread(accCreator,"Worker " + i);
             }
 
-            for (int i = 0; i < THREADS; i++) {
+            for (int i = 0; i < PalletTown.threads; i++) {
                 threads[i].start();
             }
 
             System.out.println(Thread.currentThread().getName()+ " is twiddling its thumbs");
             try {
-                for (int i = 0; i < THREADS; i++)
+                for (int i = 0; i < PalletTown.threads; i++)
                     threads[i].join(360000);
             } catch (InterruptedException e) {
                 e.printStackTrace();

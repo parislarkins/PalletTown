@@ -5,10 +5,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -30,16 +27,21 @@ public class GUI extends Application{
     private static final int VIEWER_WIDTH = 500;
     private static final int VIEWER_HEIGHT = 500;
 
-    private Group root = new Group();
-
+    private Group mainRoot = new Group();
     static Group controls = new Group();
     private Stage primaryStage;
+    
+    static Group advancedRoot = new Group();
+    static Group advancedControls = new Group();
+    private Stage advancedStage = null;
+    private Scene advancedScene;
+
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
         primaryStage.setTitle("PalletTown");
-        Scene scene = new Scene(root);
+        Scene scene = new Scene(mainRoot);
         primaryStage.setResizable(false);
 
         // load the image
@@ -49,7 +51,7 @@ public class GUI extends Application{
         ImageView viewBG = new ImageView();
         viewBG.setImage(background);
 
-        root.getChildren().add(controls);
+        mainRoot.getChildren().add(controls);
 
         makeControls();
 
@@ -59,7 +61,7 @@ public class GUI extends Application{
         viewBG.setFitHeight(scene.getHeight());
         viewBG.setFitWidth(scene.getWidth());
 
-        root.getChildren().add(0,viewBG);
+        mainRoot.getChildren().add(0,viewBG);
         makePython();
     }
 
@@ -413,13 +415,13 @@ public class GUI extends Application{
 
     private void makeControls() {
 
-        VBox vb = new VBox();
-        vb.setSpacing(10);
-        vb.setPadding(new Insets(15,15,15,15));
-        vb.setLayoutX(10);
-        vb.setLayoutY(10);
-        vb.setAlignment(Pos.CENTER);
-        vb.setBackground(new Background(new BackgroundFill(Color.rgb(140,140,140,.5), CornerRadii.EMPTY, Insets.EMPTY)));
+        VBox mainVb = new VBox();
+        mainVb.setSpacing(10);
+        mainVb.setPadding(new Insets(15,15,15,15));
+        mainVb.setLayoutX(10);
+        mainVb.setLayoutY(10);
+        mainVb.setAlignment(Pos.CENTER);
+        mainVb.setBackground(new Background(new BackgroundFill(Color.rgb(140,140,140,.5), CornerRadii.EMPTY, Insets.EMPTY)));
 
         Label plusMaillabel = new Label("Email:");
 
@@ -432,7 +434,7 @@ public class GUI extends Application{
         mail.getChildren().addAll(plusMaillabel, plusMail);
         mail.setSpacing(10);
 
-        vb.getChildren().add(mail);
+        mainVb.getChildren().add(mail);
 
         Label userLabel = new Label("Username:");
 
@@ -444,7 +446,7 @@ public class GUI extends Application{
         user.getChildren().addAll(userLabel, userName);
         user.setSpacing(10);
 
-        vb.getChildren().add(user);
+        mainVb.getChildren().add(user);
 
         Label passLabel = new Label("Password:");
 
@@ -456,7 +458,7 @@ public class GUI extends Application{
         pass.getChildren().addAll(passLabel,password);
         pass.setSpacing(10);
 
-        vb.getChildren().add(pass);
+        mainVb.getChildren().add(pass);
 
         Label numLabel = new Label("Number of accounts:");
         final TextField numAccounts = new TextField();
@@ -468,7 +470,7 @@ public class GUI extends Application{
         num.getChildren().addAll(numLabel,numAccounts);
         num.setSpacing(10);
 
-        vb.getChildren().add(num);
+        mainVb.getChildren().add(num);
 
         Label startLabel = new Label("Start number:");
         final TextField startNum = new TextField();
@@ -479,7 +481,7 @@ public class GUI extends Application{
         start.getChildren().addAll(startLabel,startNum);
         start.setSpacing(10);
 
-        vb.getChildren().add(start);
+        mainVb.getChildren().add(start);
 
         Label captchaLabel = new Label("2Captcha Key:");
         final TextField captchaKey = new TextField();
@@ -490,10 +492,10 @@ public class GUI extends Application{
         captcha.getChildren().addAll(captchaLabel,captchaKey);
         captcha.setSpacing(10);
 
-        vb.getChildren().add(captcha);
+        mainVb.getChildren().add(captcha);
 
         CheckBox autoVerify = new CheckBox("Auto Verify Accounts");
-        vb.getChildren().add(autoVerify);
+        mainVb.getChildren().add(autoVerify);
 
         Label gmailLabel = new Label("Gmail Account:");
 
@@ -506,7 +508,7 @@ public class GUI extends Application{
         gm.getChildren().addAll(gmailLabel, gmail);
         gm.setSpacing(10);
 
-        vb.getChildren().add(gm);
+        mainVb.getChildren().add(gm);
 
         Label gmPassLabel = new Label("Gmail Password:");
 
@@ -519,11 +521,11 @@ public class GUI extends Application{
         gmPw.getChildren().addAll(gmPassLabel, gmailPass);
         gmPw.setSpacing(10);
 
-        vb.getChildren().add(gmPw);
+        mainVb.getChildren().add(gmPw);
 
         CheckBox acceptTos = new CheckBox("Accept account TOS");
         acceptTos.setDisable(true);
-        vb.getChildren().add(acceptTos);
+        mainVb.getChildren().add(acceptTos);
 
         ArrayList<String> extensions = new ArrayList<>();
         extensions.add("*.txt");
@@ -546,7 +548,7 @@ public class GUI extends Application{
         output.getChildren().addAll(outputLabel, outputFile);
         output.setSpacing(10);
 
-        vb.getChildren().add(output);
+        mainVb.getChildren().add(output);
 
         File[] file = new File[1];
 
@@ -568,7 +570,7 @@ public class GUI extends Application{
         proxy.getChildren().addAll(proxyLabel, proxyFile);
         proxy.setSpacing(10);
 
-        vb.getChildren().add(proxy);
+        mainVb.getChildren().add(proxy);
 
         File[] pFile = new File[1];
 
@@ -585,13 +587,57 @@ public class GUI extends Application{
             }
         });
 
+        Button advanced = new Button("Advanced Settings");
+        advanced.setOnAction(event -> showAdvanced());
+        mainVb.getChildren().add(advanced);
+
         Button submit = new Button("Create accounts");
         submit.setOnAction(event -> PalletTown.Start());
-        vb.getChildren().add(submit);
+        mainVb.getChildren().add(submit);
+
+        controls.getChildren().add(mainVb);
+    }
+
+    private void showAdvanced() {
+        //If the helpScene hasnt been created yet, create it
+        if (advancedScene == null) {
+
+            makeAdvancedControls();
+
+            advancedScene = new Scene(advancedRoot);
+
+            advancedStage = new Stage();
+            advancedStage.setTitle("Advanced Settings");
+            advancedStage.setScene(advancedScene);
+        }
+
+        advancedStage.show();
+    }
+
+    private void makeAdvancedControls() {
+
+        VBox vb = new VBox();
+        vb.setSpacing(10);
+        vb.setPadding(new Insets(15,15,15,15));
+        vb.setLayoutX(10);
+        vb.setLayoutY(10);
+        vb.setAlignment(Pos.CENTER);
+
+        advancedRoot.getChildren().addAll(vb);
 
         CheckBox debug = new CheckBox("Debug Mode");
         vb.getChildren().add(debug);
 
-        controls.getChildren().add(vb);
+        Label threadsLabel = new Label("Threads:");
+
+        final TextField threads = new TextField("5");
+        threads.setPrefWidth(50);
+
+        HBox thrds = new HBox();
+        thrds.setAlignment(Pos.CENTER_RIGHT);
+        thrds.getChildren().addAll(threadsLabel,threads);
+        thrds.setSpacing(10);
+
+        vb.getChildren().add(thrds);
     }
 }

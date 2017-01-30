@@ -27,6 +27,7 @@ public class PalletTown {
     public static File outputFile;
     public static File proxyFile;
     public static boolean debug;
+    public static int threads;
 
     public static void Start(){
         parseArgs();
@@ -213,8 +214,14 @@ public class PalletTown {
         TextField proxyPath = (TextField) proxy.getChildren().get(1);
         proxyFile = proxyPath.getText().equals("") ? null : new File(proxyPath.getText());
 
-        CheckBox debugMode = (CheckBox) vb.getChildren().get(13);
+        VBox advancedVb = (VBox) GUI.advancedRoot.getChildren().get(0);
+
+        CheckBox debugMode = (CheckBox) advancedVb.getChildren().get(0);
         debug = debugMode.isSelected();
+
+        HBox threadbox = (HBox) advancedVb.getChildren().get(1);
+        TextField threadNum = (TextField) threadbox.getChildren().get(1);
+        threads = threadNum.getText().equals("") ? 5 : Integer.parseInt(threadNum.getText());
     }
 
     public static String millisToTime(long millis){
