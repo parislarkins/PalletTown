@@ -1,11 +1,9 @@
 package pallettown;
 
-import javafx.scene.control.Alert;
-
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Paris on 20/01/2017.
@@ -19,7 +17,7 @@ public class AccountCreator implements Runnable{
     private static String username;
     private static String password;
     private static String plusMail;
-    private static String captchaKey = "";
+    private static String captchaKey;
 
     public static int WORK_ITEMS;
 
@@ -29,12 +27,9 @@ public class AccountCreator implements Runnable{
 
     private static ArrayList<PTCProxy> proxies = new ArrayList<>();
 
-    private static long startTime = 0;
-    private static long endTime = 0;
-
-
     public static boolean createAccounts(String user, String pass, String plus, String captcha) {
 
+        loadProxies();
         //5 accounts per IP per 10 minutes
         username = user;
         password = pass;
@@ -43,34 +38,27 @@ public class AccountCreator implements Runnable{
 
         WORK_ITEMS = PalletTown.count;
 
-        startTime = System.currentTimeMillis();
-
-        loadProxies();
-
         if(PalletTown.captchaKey.equals("")){
             System.out.println("manual captcha");
             for (int i = 0; i < PalletTown.count; i++) {
-                PTCProxy proxy = getProxy();
-                createAccount(i, Thread.currentThread().getName(), proxy.IP());
-                proxy.Use();
+                createAccount(i, Thread.currentThread().getName(), getProxy());
             }
         }else{
-
             AccountCreator accCreator = new AccountCreator();
-            Thread[] threads = new Thread[PalletTown.threads];
+            Thread[] threads = new Thread[THREADS];
 
-            for (int i = 0; i < PalletTown.threads; i++) {
+            for (int i = 0; i < THREADS; i++) {
                 threads[i] = new Thread(accCreator,"Worker " + i);
             }
 
-            for (int i = 0; i < PalletTown.threads; i++) {
+            for (int i = 0; i < THREADS; i++) {
                 threads[i].start();
             }
 
             System.out.println(Thread.currentThread().getName()+ " is twiddling its thumbs");
             try {
-                for (int i = 0; i < PalletTown.threads; i++)
-                    threads[i].join(360000);
+                for (int i = 0; i < THREADS; i++)
+                    threads[i].join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -82,7 +70,7 @@ public class AccountCreator implements Runnable{
     }
 
     synchronized
-    private static PTCProxy getProxy() {
+    private static String getProxy() {
         System.out.println("getting proxy for " + Thread.currentThread().getName());
 
         PTCProxy shortestWait = null;
@@ -97,22 +85,37 @@ public class AccountCreator implements Runnable{
 
             if(!proxy.Started()){
                 System.out.println("    proxy unstarted, using..");
-                proxy.ReserveUse();
-                return proxy;
+                proxy.StartUsing();
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return proxy.IP();
             }
 
             if(proxy.Usable()){
+                proxy.Use();
                 System.out.println("    proxy usable, using...");
-                proxy.ReserveUse();
-                return proxy;
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return proxy.IP();
             }else{
-                System.out.println("    proxy unusable");
                 if(proxy.WaitTime() == 0){
                     System.out.println("    proxy ready to be reset, updating queue and using...");
                     proxy.UpdateQueue();
-                    proxy.ReserveUse();
-                    return proxy;
+                    proxy.Use();
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    return proxy.IP();
                 }
+                System.out.println("    proxy unusable");
                 if(proxy.WaitTime() < shortestWait.WaitTime()){
                     System.out.println("    proxy new shortest delay");
                     shortestWait = proxy;
@@ -120,47 +123,36 @@ public class AccountCreator implements Runnable{
             }
         }
 
-
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Waiting...");
-        alert.setHeaderText(null);
-        alert.setContentText("Waiting " + PalletTown.millisToTime(shortestWait.WaitTime()) + " until IP restriction is lifted");
-        alert.showAndWait();
-
         System.out.println("    no available proxies, waiting for next available proxy...");
         try {
-            System.out.println("    shortest wait time: " + PalletTown.millisToTime(shortestWait.WaitTime()));
+            System.out.println("    shortest wait time: " + shortestWait.WaitTime());
             Thread.sleep(shortestWait.WaitTime());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         shortestWait.UpdateQueue();
-        shortestWait.ReserveUse();
-        return shortestWait;
+        shortestWait.Use();
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return shortestWait.IP();
     }
 
     private static void loadProxies() {
 
-        if(PalletTown.proxyFile == null){
-            System.out.println("no proxy file specified");
-            proxies.add(new PTCProxy("null"));
-            return;
-        }
-
         try {
             Scanner in = new Scanner(PalletTown.proxyFile);
 
-            while (in.hasNext()) {
+            while(in.hasNext()){
                 String proxy = in.nextLine();
                 proxies.add(new PTCProxy(proxy));
             }
-
-            proxies.add(new PTCProxy("null"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
-
 
     @Override
     public void run() {
@@ -169,17 +161,9 @@ public class AccountCreator implements Runnable{
         int accNum;
         while ((accNum = incAccNum()) < WORK_ITEMS) {
             System.out.println(Thread.currentThread().getName()+" making account "+ accNum);
-
-            PTCProxy proxy = getProxy();
-            createAccount(accNum,Thread.currentThread().getName(), proxy.IP());
-            System.out.println(Thread.currentThread().getName() + "done making account " + accNum + " sleeping for 500ms");
-            proxy.Use();
+            createAccount(accNum,Thread.currentThread().getName(), getProxy());
+            System.out.println(Thread.currentThread().getName() + "done making account " + accNum);
             mytaskcount++;
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
 
         System.out.println(Thread.currentThread().getName()+" did "+mytaskcount+ " tasks");
@@ -203,7 +187,7 @@ public class AccountCreator implements Runnable{
         String accUser;
 
         if(username == null){
-//            System.out.println("no username specified, generating one");
+            System.out.println("no username specified, generating one");
             accUser = RandomDetails.randomUsername();
         }else{
             if(PalletTown.count > 1 && PalletTown.startNum == null)
@@ -216,7 +200,7 @@ public class AccountCreator implements Runnable{
 
         String accPw;
         if(password == null){
-//            System.out.println("no password specified, generating one");
+            System.out.println("no password specified, generating one");
             accPw = RandomDetails.randomPassword();
         }else{
             accPw = password;
@@ -273,43 +257,23 @@ public class AccountCreator implements Runnable{
 //            PyObject result = someFunc.__call__(new PyString[] {new PyString(username),new PyString(password), new PyString(email), new PyString(dob), new PyString(captchaKey)});
 //            String realResult = (String) result.__tojava__(String.class);
 
-            if(captchaKey.isEmpty()) captchaKey = "null";
-
-            if(proxy.isEmpty()) proxy = "null";
-
             String[] commands = new String[] {
                     "python",
                     "accountcreate.py",
-                    username,
-                    password,
-                    email,
-                    dob,
-                    captchaKey,
-                    name,
-                    proxy
+                    "\""+username + "\"",
+                    "\""+password + "\"",
+                    "\""+email + "\"",
+                    "\""+dob + "\"",
+                    "\""+captchaKey + "\"",
+                    "\"" + name + "\"",
+                    "\"" + proxy + "\""
             };
 
-//            for (String command : commands) {
-//                System.out.println(command);
-//            }
-
-//            ProcessBuilder pb = new ProcessBuilder("python", "accountcreate.py " + username + " " + password + " " + email +
-//                    " " + dob + " \"\" " + name + " " + " \"\" ");
             ProcessBuilder pb = new ProcessBuilder(commands);
 
             pb.redirectErrorStream(true);
 
             Process p = pb.start();
-
-            if(!p.waitFor(6, TimeUnit.MINUTES)){
-                System.out.println(Thread.currentThread().getName() + " python process timed out, terminating...");
-                p.destroy();
-                Thread.sleep(1000);
-                if(p.isAlive()){
-                    p.destroyForcibly();
-                }
-                return false;
-            }
 
             Scanner in = new Scanner(new InputStreamReader(p.getInputStream()));
 

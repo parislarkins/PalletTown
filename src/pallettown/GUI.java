@@ -5,7 +5,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -27,21 +30,16 @@ public class GUI extends Application{
     private static final int VIEWER_WIDTH = 500;
     private static final int VIEWER_HEIGHT = 500;
 
-    private Group mainRoot = new Group();
+    private Group root = new Group();
+
     static Group controls = new Group();
     private Stage primaryStage;
-    
-    static Group advancedRoot = new Group();
-    static Group advancedControls = new Group();
-    private Stage advancedStage = null;
-    private Scene advancedScene;
-
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
         primaryStage.setTitle("PalletTown");
-        Scene scene = new Scene(mainRoot);
+        Scene scene = new Scene(root);
         primaryStage.setResizable(false);
 
         // load the image
@@ -51,7 +49,7 @@ public class GUI extends Application{
         ImageView viewBG = new ImageView();
         viewBG.setImage(background);
 
-        mainRoot.getChildren().add(controls);
+        root.getChildren().add(controls);
 
         makeControls();
 
@@ -61,7 +59,7 @@ public class GUI extends Application{
         viewBG.setFitHeight(scene.getHeight());
         viewBG.setFitWidth(scene.getWidth());
 
-        mainRoot.getChildren().add(0,viewBG);
+        root.getChildren().add(0,viewBG);
         makePython();
     }
 
@@ -74,7 +72,6 @@ public class GUI extends Application{
                     "import random\n" +
                     "import datetime\n" +
                     "import urllib2\n" +
-                    "import platform\n" +
                     "\n" +
                     "from selenium import webdriver\n" +
                     "from selenium.webdriver.support.ui import WebDriverWait\n" +
@@ -96,14 +93,12 @@ public class GUI extends Application{
                     "    'https://club.pokemon.com/us/pokemon-trainer-club/parents/email',\n" +
                     "    # This initially seemed to be the proper success redirect\n" +
                     "    'https://club.pokemon.com/us/pokemon-trainer-club/sign-up/',\n" +
-                    "    'https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up'\n" +
                     "    # but experimentally it now seems to return to the sign-up, but still registers\n" +
                     ")\n" +
                     "\n" +
                     "# As both seem to work, we'll check against both success destinations until I have I better idea for how to check success\n" +
                     "DUPE_EMAIL_URL = 'https://club.pokemon.com/us/pokemon-trainer-club/forgot-password?msg=users.email.exists'\n" +
                     "BAD_DATA_URL = 'https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up'\n" +
-                    "RATE_LIMIT_URL = 'https://club.pokemon.com/us/pokemon-trainer-club/sign-up/?rate_limit_exceeded=True'\n" +
                     "\n" +
                     "logfile = \"pallettown.log\"\n" +
                     "\n" +
@@ -121,7 +116,6 @@ public class GUI extends Application{
                     "    'PTCInvalidEmailException',\n" +
                     "    'PTCInvalidPasswordException',\n" +
                     "    'PTCInvalidBirthdayException',\n" +
-                    "    'PTCRateLimitExceededException',\n" +
                     "    'PTCTwocaptchaException'\n" +
                     "]\n" +
                     "\n" +
@@ -152,10 +146,6 @@ public class GUI extends Application{
                     "\n" +
                     "class PTCInvalidBirthdayException(PTCException):\n" +
                     "    \"\"\"Birthday invalid\"\"\"\n" +
-                    "    pass\n" +
-                    "\n" +
-                    "class PTCRateLimitExceededException(PTCException):\n" +
-                    "    \"\"\"5 accounts per IP per 10 minutes limit exceeded\"\"\"\n" +
                     "    pass\n" +
                     "\n" +
                     "class PTCTwocaptchaException(PTCException):\n" +
@@ -192,24 +182,20 @@ public class GUI extends Application{
                     "\n" +
                     "def _validate_response(driver):\n" +
                     "    url = driver.current_url\n" +
-                    "    log(\"RESPONSE_VALIDATOR\",url)\n" +
                     "    if url in SUCCESS_URLS:\n" +
                     "        return True\n" +
                     "    elif url == DUPE_EMAIL_URL:\n" +
-                    "        log (\"RESPONSE_VALIDATOR\",\"Email already in use\")\n" +
+                    "        log (threadname,\"Email already in use\")\n" +
                     "        raise PTCInvalidEmailException(\"Email already in use.\")\n" +
                     "    elif url == BAD_DATA_URL:\n" +
                     "        if \"Enter a valid email address.\" in driver.page_source:\n" +
-                    "            log (\"RESPONSE_VALIDATOR\",\"Invalid Email used\")\n" +
+                    "            log (threadname,\"Invalid Email used\")\n" +
                     "            raise PTCInvalidEmailException(\"Invalid email.\")\n" +
                     "        else:\n" +
-                    "            log (\"RESPONSE_VALIDATOR\",\"Username already in use\")\n" +
+                    "            log (threadname,\"Username already in use\")\n" +
                     "            raise PTCInvalidNameException(\"Username already in use.\")\n" +
-                    "    elif url == RATE_LIMIT_URL:\n" +
-                    "        log(\"RESPONSE_VALIDATOR\",\"Account creation IP limit exceeded\")\n" +
-                    "        raise PTCRateLimitExceededException(\"Account creation IP limit exceeded\")\n" +
                     "    else:\n" +
-                    "        log (\"RESPONSE_VALIDATOR\",\"Some other error returned by Niantic\")\n" +
+                    "        log (threadname,\"Some other error returned by Niantic\")\n" +
                     "        raise PTCException(\"Generic failure. User was not created.\")\n" +
                     "\n" +
                     "def create_account(username, password, email, birthday, captchakey2, threadname, proxy, captchatimeout):\n" +
@@ -217,10 +203,8 @@ public class GUI extends Application{
                     "    log(threadname,\" initializing..\")\n" +
                     "    log(threadname,\"Attempting to create user {user}:{pw}. Opening browser...\".format(user=username, pw=password))\n" +
                     "    \n" +
-                    "    if(captchakey2 == \"null\"):\n" +
+                    "    if(captchakey2 == \"\"):\n" +
                     "        captchakey2 = None\n" +
-                    "    if(proxy == \"null\"):\n" +
-                    "        proxy = None\n" +
                     "\n" +
                     "    if captchakey2 != None:\n" +
                     "        log(threadname,\"2captcha key\")\n" +
@@ -228,7 +212,7 @@ public class GUI extends Application{
                     "        dcap[\"phantomjs.page.settings.userAgent\"] = user_agent\n" +
                     "\n" +
                     "        print(proxy)\n" +
-                    "        if proxy != None:\n" +
+                    "        if proxy != \"\":\n" +
                     "            serv_args = [\n" +
                     "                '--proxy=https://' + proxy,\n" +
                     "                '--proxy-type=https',\n" +
@@ -248,29 +232,28 @@ public class GUI extends Application{
                     "    else:\n" +
                     "        log(threadname,\"No 2captcha key\")\n" +
                     "\n" +
-                    "        if(platform.system() == \"Windows\" or platform.system() == \"Darwin\"):\n" +
-                    "            driver = webdriver.Chrome()\n" +
-                    "        else:\n" +
-                    "            driver = webdriver.Firefox()\n" +
+                    "        chrome_options = webdriver.ChromeOptions()\n" +
+                    "        chrome_options.add_argument('--proxy-server=' + proxy)\n" +
                     "\n" +
-                    "    driver.set_window_size(600, 600)\n" +
+                    "        driver = webdriver.Chrome(chrome_options=chrome_options)\n" +
+                    "        driver.set_window_size(600, 600)\n" +
+                    "        #testing\n" +
+                    "        #driver.get(\"http://whatismyipaddress.com\")\n" +
+                    "        log(threadname,\"proxy: \" + proxy)\n" +
+                    "        return True\n" +
                     "\n" +
+                    "    # Input age: 1992-01-08\n" +
+                    "    log(threadname,\"Step 1: Verifying age using birthday: {}\".format(birthday))\n" +
                     "    try:\n" +
-                    "        # Input age: 1992-01-08\n" +
-                    "        print(\"Step 1: Verifying age using birthday: {}\".format(birthday))\n" +
                     "        driver.get(\"{}/sign-up/\".format(BASE_URL))\n" +
-                    "        assert driver.current_url == \"{}/sign-up/\".format(BASE_URL)\n" +
-                    "        elem = driver.find_element_by_name(\"dob\")\n" +
-                    "\n" +
+                    "        log(threadname,\"Driver current url: \" + driver.current_url)\n" +
                     "    except Exception as e:\n" +
-                    "        log(threadname, \"unknown Error verifying age, terminating\")\n" +
-                    "        driver.close()\n" +
+                    "        log(threadname, \"unkown Error verifying age, terminating\")\n" +
                     "        driver.quit()\n" +
                     "        return False\n" +
                     "\n" +
                     "    if driver.current_url != \"{}/sign-up/\".format(BASE_URL):\n" +
                     "        log(threadname,\"Driver url wrong, exiting...\")\n" +
-                    "        driver.close()\n" +
                     "        driver.quit()\n" +
                     "        return False\n" +
                     "        \n" +
@@ -292,11 +275,8 @@ public class GUI extends Application{
                     "\n" +
                     "    # Create account page\n" +
                     "    log(threadname,\"Step 2: Entering account details\")\n" +
-                    "    #assert driver.current_url == \"{}/parents/sign-up\".format(BASE_URL)\n" +
-                    "    log(threadname,\"{}/parents/sign-up\".format(BASE_URL))\n" +
-                    "    log(threadname,driver.current_url)\n" +
+                    "    assert driver.current_url == \"{}/parents/sign-up\".format(BASE_URL)\n" +
                     "\n" +
-                    "    driver.implicitly_wait(10)\n" +
                     "    user = driver.find_element_by_name(\"username\")\n" +
                     "    user.clear()\n" +
                     "    user.send_keys(username)\n" +
@@ -334,7 +314,6 @@ public class GUI extends Application{
                     "            time.sleep(1)\n" +
                     "        except TimeoutException, err:\n" +
                     "            log(threadname,\"Timed out while manually solving captcha\")\n" +
-                    "            driver.close()\n" +
                     "            driver.quit()\n" +
                     "            return False\n" +
                     "    else:\n" +
@@ -360,7 +339,6 @@ public class GUI extends Application{
                     "            elapsedtime = int(time.time()) - start_time\n" +
                     "            if elapsedtime > captchatimeout:\n" +
                     "                log(threadname,\"Captcha timeout reached. Exiting.\")\n" +
-                    "                driver.close()\n" +
                     "                driver.quit()\n" +
                     "                timedout = True\n" +
                     "                return True\n" +
@@ -382,7 +360,6 @@ public class GUI extends Application{
                     "        log (threadname,\"submitted\")\n" +
                     "    except StaleElementReferenceException:\n" +
                     "        log(threadname,\"Error StaleElementReferenceException!\")\n" +
-                    "        driver.close()\n" +
                     "        driver.quit()\n" +
                     "        return False\n" +
                     "\n" +
@@ -390,14 +367,13 @@ public class GUI extends Application{
                     "        log (threadname,\"trying to validate response\")\n" +
                     "        _validate_response(driver)\n" +
                     "        log (threadname,\"validated response\")\n" +
-                    "    except PTCException:\n" +
+                    "    except:\n" +
                     "        log(threadname,\"Failed to create user: {}\".format(username) + \"exiting...\")\n" +
-                    "        driver.close()\n" +
                     "        driver.quit()\n" +
+                    "        raise PTCInvalidNameException(\"failed to create user\")\n" +
                     "        log(threadname, \"threw failed to create user exception, terminate\")\n" +
                     "        return False\n" +
                     "\n" +
-                    "    driver.close()\n" +
                     "    driver.quit()\n" +
                     "    log(threadname,\"Closed driver\")\n" +
                     "    log(threadname,\"Account successfully created.\\n \\n\")\n" +
@@ -415,13 +391,13 @@ public class GUI extends Application{
 
     private void makeControls() {
 
-        VBox mainVb = new VBox();
-        mainVb.setSpacing(10);
-        mainVb.setPadding(new Insets(15,15,15,15));
-        mainVb.setLayoutX(10);
-        mainVb.setLayoutY(10);
-        mainVb.setAlignment(Pos.CENTER);
-        mainVb.setBackground(new Background(new BackgroundFill(Color.rgb(140,140,140,.5), CornerRadii.EMPTY, Insets.EMPTY)));
+        VBox vb = new VBox();
+        vb.setSpacing(10);
+        vb.setPadding(new Insets(15,15,15,15));
+        vb.setLayoutX(10);
+        vb.setLayoutY(10);
+        vb.setAlignment(Pos.CENTER);
+        vb.setBackground(new Background(new BackgroundFill(Color.rgb(140,140,140,.5), CornerRadii.EMPTY, Insets.EMPTY)));
 
         Label plusMaillabel = new Label("Email:");
 
@@ -434,7 +410,7 @@ public class GUI extends Application{
         mail.getChildren().addAll(plusMaillabel, plusMail);
         mail.setSpacing(10);
 
-        mainVb.getChildren().add(mail);
+        vb.getChildren().add(mail);
 
         Label userLabel = new Label("Username:");
 
@@ -446,7 +422,7 @@ public class GUI extends Application{
         user.getChildren().addAll(userLabel, userName);
         user.setSpacing(10);
 
-        mainVb.getChildren().add(user);
+        vb.getChildren().add(user);
 
         Label passLabel = new Label("Password:");
 
@@ -458,7 +434,7 @@ public class GUI extends Application{
         pass.getChildren().addAll(passLabel,password);
         pass.setSpacing(10);
 
-        mainVb.getChildren().add(pass);
+        vb.getChildren().add(pass);
 
         Label numLabel = new Label("Number of accounts:");
         final TextField numAccounts = new TextField();
@@ -470,7 +446,7 @@ public class GUI extends Application{
         num.getChildren().addAll(numLabel,numAccounts);
         num.setSpacing(10);
 
-        mainVb.getChildren().add(num);
+        vb.getChildren().add(num);
 
         Label startLabel = new Label("Start number:");
         final TextField startNum = new TextField();
@@ -481,7 +457,7 @@ public class GUI extends Application{
         start.getChildren().addAll(startLabel,startNum);
         start.setSpacing(10);
 
-        mainVb.getChildren().add(start);
+        vb.getChildren().add(start);
 
         Label captchaLabel = new Label("2Captcha Key:");
         final TextField captchaKey = new TextField();
@@ -492,10 +468,10 @@ public class GUI extends Application{
         captcha.getChildren().addAll(captchaLabel,captchaKey);
         captcha.setSpacing(10);
 
-        mainVb.getChildren().add(captcha);
+        vb.getChildren().add(captcha);
 
         CheckBox autoVerify = new CheckBox("Auto Verify Accounts");
-        mainVb.getChildren().add(autoVerify);
+        vb.getChildren().add(autoVerify);
 
         Label gmailLabel = new Label("Gmail Account:");
 
@@ -508,7 +484,7 @@ public class GUI extends Application{
         gm.getChildren().addAll(gmailLabel, gmail);
         gm.setSpacing(10);
 
-        mainVb.getChildren().add(gm);
+        vb.getChildren().add(gm);
 
         Label gmPassLabel = new Label("Gmail Password:");
 
@@ -521,20 +497,18 @@ public class GUI extends Application{
         gmPw.getChildren().addAll(gmPassLabel, gmailPass);
         gmPw.setSpacing(10);
 
-        mainVb.getChildren().add(gmPw);
+        vb.getChildren().add(gmPw);
 
         CheckBox acceptTos = new CheckBox("Accept account TOS");
-        acceptTos.setDisable(true);
-        mainVb.getChildren().add(acceptTos);
+        vb.getChildren().add(acceptTos);
 
-        ArrayList<String> extensions = new ArrayList<>();
-        extensions.add("*.txt");
-        extensions.add("*.csv");
+        ArrayList<String> extentions = new ArrayList<>();
+        extentions.add("*.txt");
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select output file");
         fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Text File", extensions)
+                new FileChooser.ExtensionFilter("Text File", extentions)
         );
         fileChooser.setSelectedExtensionFilter(fileChooser.getExtensionFilters().get(0));
 
@@ -548,10 +522,9 @@ public class GUI extends Application{
         output.getChildren().addAll(outputLabel, outputFile);
         output.setSpacing(10);
 
-        mainVb.getChildren().add(output);
+        vb.getChildren().add(output);
 
         File[] file = new File[1];
-
 
         outputFile.setOnMouseClicked(event -> {
             file[0] = fileChooser.showOpenDialog(primaryStage);
@@ -570,74 +543,24 @@ public class GUI extends Application{
         proxy.getChildren().addAll(proxyLabel, proxyFile);
         proxy.setSpacing(10);
 
-        mainVb.getChildren().add(proxy);
+        vb.getChildren().add(proxy);
 
         File[] pFile = new File[1];
 
         proxyFile.setOnMouseClicked(event -> {
-            fileChooser.setTitle("Select proxy file");
-            fileChooser.getExtensionFilters().removeAll();
-            fileChooser.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter("Text File","*.txt")
-            );
-            fileChooser.setSelectedExtensionFilter(fileChooser.getExtensionFilters().get(1));
             pFile[0] = fileChooser.showOpenDialog(primaryStage);
             if (pFile[0] != null) {
                 proxyFile.setText(pFile[0].getAbsolutePath());
             }
         });
 
-        Button advanced = new Button("Advanced Settings");
-        advanced.setOnAction(event -> showAdvanced());
-        mainVb.getChildren().add(advanced);
-
         Button submit = new Button("Create accounts");
         submit.setOnAction(event -> PalletTown.Start());
-        mainVb.getChildren().add(submit);
-
-        controls.getChildren().add(mainVb);
-    }
-
-    private void showAdvanced() {
-        //If the helpScene hasnt been created yet, create it
-        if (advancedScene == null) {
-
-            makeAdvancedControls();
-
-            advancedScene = new Scene(advancedRoot);
-
-            advancedStage = new Stage();
-            advancedStage.setTitle("Advanced Settings");
-            advancedStage.setScene(advancedScene);
-        }
-
-        advancedStage.show();
-    }
-
-    private void makeAdvancedControls() {
-
-        VBox vb = new VBox();
-        vb.setSpacing(10);
-        vb.setPadding(new Insets(15,15,15,15));
-        vb.setLayoutX(10);
-        vb.setLayoutY(10);
-        vb.setAlignment(Pos.CENTER);
-
-        advancedRoot.getChildren().addAll(vb);
+        vb.getChildren().add(submit);
 
         CheckBox debug = new CheckBox("Debug Mode");
         vb.getChildren().add(debug);
 
-        Label threadsLabel = new Label("Threads:");
-
-        final TextField threads = new TextField("5");
-        threads.setPrefWidth(50);
-
-        HBox thrds = new HBox();
-        thrds.setAlignment(Pos.CENTER_RIGHT);
-        thrds.getChildren().addAll(threadsLabel,threads);
-        thrds.setSpacing(10);
-
-        vb.getChildren().add(thrds);
+        controls.getChildren().add(vb);
     }
 }
