@@ -1,6 +1,7 @@
 package pallettown;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -13,10 +14,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -35,6 +33,7 @@ public class GUI extends Application{
     static Group advancedControls = new Group();
     private Stage advancedStage = null;
     private Scene advancedScene;
+    private TextArea textArea;
 
 
     @Override
@@ -54,6 +53,8 @@ public class GUI extends Application{
         mainRoot.getChildren().add(controls);
 
         makeControls();
+
+        makeAdvancedControls();
 
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -249,7 +250,12 @@ public class GUI extends Application{
                     "        log(threadname,\"No 2captcha key\")\n" +
                     "\n" +
                     "        if(platform.system() == \"Windows\" or platform.system() == \"Darwin\"):\n" +
-                    "            driver = webdriver.Chrome()\n" +
+                    "            if(proxy != None):\n" +
+                    "                chrome_options = webdriver.ChromeOptions()\n" +
+                    "                chrome_options.add_argument('--proxy-server=%s' % proxy)\n" +
+                    "                driver = webdriver.Chrome(chrome_options=chrome_options)\n" +
+                    "            else:\n" +
+                    "                driver = webdriver.Chrome()\n" +
                     "        else:\n" +
                     "            driver = webdriver.Firefox()\n" +
                     "\n" +
@@ -540,18 +546,22 @@ public class GUI extends Application{
 
         Label outputLabel = new Label("Output File:");
 
-        final TextField outputFile = new TextField();
+        TextField outputFile = new TextField();
         outputFile.setPrefWidth(350);
+
+        Button clearOutput = new Button("Clear");
+        clearOutput.setOnAction(event -> {
+            outputFile.clear();
+        });
 
         HBox output = new HBox();
         output.setAlignment(Pos.CENTER_RIGHT);
-        output.getChildren().addAll(outputLabel, outputFile);
+        output.getChildren().addAll(outputLabel, outputFile,clearOutput);
         output.setSpacing(10);
 
         mainVb.getChildren().add(output);
 
         File[] file = new File[1];
-
 
         outputFile.setOnMouseClicked(event -> {
             file[0] = fileChooser.showOpenDialog(primaryStage);
@@ -562,12 +572,17 @@ public class GUI extends Application{
 
         Label proxyLabel = new Label("Proxy File");
 
-        final TextField proxyFile = new TextField();
+        TextField proxyFile = new TextField();
         proxyFile.setPrefWidth(350);
+
+        Button clearProxy = new Button("Clear");
+        clearProxy.setOnAction(event -> {
+            proxyFile.clear();
+        });
 
         HBox proxy = new HBox();
         proxy.setAlignment(Pos.CENTER_RIGHT);
-        proxy.getChildren().addAll(proxyLabel, proxyFile);
+        proxy.getChildren().addAll(proxyLabel, proxyFile,clearProxy);
         proxy.setSpacing(10);
 
         mainVb.getChildren().add(proxy);
@@ -602,7 +617,7 @@ public class GUI extends Application{
         //If the helpScene hasnt been created yet, create it
         if (advancedScene == null) {
 
-            makeAdvancedControls();
+//            makeAdvancedControls();
 
             advancedScene = new Scene(advancedRoot);
 
@@ -639,5 +654,40 @@ public class GUI extends Application{
         thrds.setSpacing(10);
 
         vb.getChildren().add(thrds);
+
+        textArea = new TextArea();
+        textArea.setEditable(false);
+
+        redirectSystemStreams();
+        vb.getChildren().add(textArea);
     }
+
+    private void updateTextArea(final String text) {
+        Platform.runLater(() -> textArea.appendText(text));
+    }
+
+    private void redirectSystemStreams() {
+        OutputStream out = new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                updateTextArea(String.valueOf((char) b));
+            }
+
+            @Override
+            public void write(byte[] b, int off, int len) throws IOException {
+                updateTextArea(new String(b, off, len));
+            }
+
+            @Override
+            public void write(byte[] b) throws IOException {
+                write(b, 0, b.length);
+            }
+        };
+
+        System.setOut(new PrintStream(out, true));
+        System.setErr(new PrintStream(out, true));
+
+        System.out.println("test");
+    }
+
 }

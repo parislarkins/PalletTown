@@ -152,12 +152,17 @@ public class AccountCreator implements Runnable{
 
             while (in.hasNext()) {
                 String proxy = in.nextLine();
+                if(proxy.startsWith("http://")){
+                    proxy = proxy.substring(7);
+                }else if(proxy.startsWith("https://")){
+                    proxy = proxy.substring(8);
+                }
                 proxies.add(new PTCProxy(proxy));
             }
 
             proxies.add(new PTCProxy("null"));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            System.out.println("Invalid proxy file");
         }
     }
 
