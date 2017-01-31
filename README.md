@@ -168,6 +168,9 @@ For more detailed documentation, please visit the [wiki](http://pallettown.readt
 
 ### <a name="basic-examples"></a> Basic Examples
 
+**Note: When using a proxy list, you may encounter errors if you have a proxy (possibly VPN too) configured for your system.
+Please disable the proxy/VPN if you encounter any errors**
+
 #### Create a single account with random details with manual captcha
 
 - Enter any email address that is plusmail compatible into the Email field. (If you aren't sure, check the FAQ [here](#faq-plusmail))

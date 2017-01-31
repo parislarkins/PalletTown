@@ -24,7 +24,7 @@ public class RandomDetails {
     };
 
     public static final char[] SYMBOLS = new char[]{
-        '#','?','!','@','$','%','^','&','>','<','+','`','*','(',')','-',']'
+        '#','!','@','$','%','&','*','(',')','[',']','{','}'
     };
 
     static String randomBirthday() {
