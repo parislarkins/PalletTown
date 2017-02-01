@@ -213,7 +213,7 @@ public class GUI extends Application{
                     "        log (\"RESPONSE_VALIDATOR\",\"Some other error returned by Niantic\")\n" +
                     "        raise PTCException(\"Generic failure. User was not created.\")\n" +
                     "\n" +
-                    "def create_account(username, password, email, birthday, captchakey2, threadname, proxy, captchatimeout):\n" +
+                    "def create_account(username, password, email, birthday, captchakey2, threadname, proxy, auth, captchatimeout):\n" +
                     "\n" +
                     "    log(threadname,\" initializing..\")\n" +
                     "    log(threadname,\"Attempting to create user {user}:{pw}. Opening browser...\".format(user=username, pw=password))\n" +
@@ -230,10 +230,17 @@ public class GUI extends Application{
                     "\n" +
                     "        print(proxy)\n" +
                     "        if proxy != None:\n" +
-                    "            serv_args = [\n" +
-                    "                '--proxy=https://' + proxy,\n" +
-                    "                '--proxy-type=https',\n" +
-                    "            ]\n" +
+                    "            if(auth == 'IP'):\n" +
+                    "                serv_args = [\n" +
+                    "                    '--proxy=https://' + proxy,\n" +
+                    "                    '--proxy-type=https',\n" +
+                    "                ]\n" +
+                    "            else:\n" +
+                    "                serv_args = [\n" +
+                    "                    '--proxy=https://' + proxy,\n" +
+                    "                    '--proxy-type=https',\n" +
+                    "                    '--proxy-auth=' + auth\n" +
+                    "                ]\n" +
                     "            driver = webdriver.PhantomJS(desired_capabilities=dcap,service_args=serv_args)\n" +
                     "            #driver.get(\"http://whatismyip.org/\")\n" +
                     "            #log(threadname,\"proxy: \" + proxy)\n" +
@@ -406,10 +413,10 @@ public class GUI extends Application{
                     "    driver.close()\n" +
                     "    driver.quit()\n" +
                     "    log(threadname,\"Closed driver\")\n" +
-                    "    log(threadname,\"Account successfully created.\\n \\n\")\n" +
+                    "    log(threadname,\"Account \" + username + \":\" + password + \" successfully created.\\n \\n\")\n" +
                     "    return True\n" +
                     "\n" +
-                    "create_account(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],sys.argv[7],180)";
+                    "create_account(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],sys.argv[7],sys.argv[8],180)";
 
             BufferedWriter out = new BufferedWriter(new FileWriter("accountcreate.py"));
             out.write(prg);
@@ -640,9 +647,6 @@ public class GUI extends Application{
 
         advancedRoot.getChildren().addAll(vb);
 
-        CheckBox debug = new CheckBox("Debug Mode");
-        vb.getChildren().add(debug);
-
         Label threadsLabel = new Label("Threads:");
 
         final TextField threads = new TextField("5");
@@ -655,11 +659,34 @@ public class GUI extends Application{
 
         vb.getChildren().add(thrds);
 
-        textArea = new TextArea();
-        textArea.setEditable(false);
+        Label delayLabel = new Label("Delay between accounts (ms):");
 
-        redirectSystemStreams();
-        vb.getChildren().add(textArea);
+        final TextField delay = new TextField("500");
+        delay.setPrefWidth(80);
+
+        HBox del = new HBox();
+        del.setAlignment(Pos.CENTER_RIGHT);
+        del.getChildren().addAll(delayLabel,delay);
+        del.setSpacing(10);
+
+        vb.getChildren().add(del);
+
+        CheckBox rocketMap = new CheckBox("RocketMap output formatting");
+        rocketMap.setSelected(true);
+        vb.getChildren().add(rocketMap);
+
+        CheckBox useMyIP = new CheckBox("Use my IP as well as proxies");
+        useMyIP.setSelected(true);
+        vb.getChildren().add(useMyIP);
+
+        CheckBox debug = new CheckBox("Debug Mode");
+        vb.getChildren().add(debug);
+
+//        textArea = new TextArea();
+//        textArea.setEditable(false);
+
+//        redirectSystemStreams();
+//        vb.getChildren().add(textArea);
     }
 
     private void updateTextArea(final String text) {
