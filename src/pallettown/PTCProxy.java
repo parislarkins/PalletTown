@@ -53,14 +53,6 @@ public class PTCProxy {
         return startTimes != null;
     }
 
-    public void Reset(){
-        try {
-            Thread.sleep(RESET_TIME);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
     public boolean Usable(){
         System.out.println("checking if proxy is usable");
         long millis = System.currentTimeMillis() - startTimes.get(0);

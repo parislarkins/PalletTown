@@ -32,14 +32,15 @@ public class GmailVerifier {
             store = getMailSession.getStore("imaps");
             store.connect(HOST, gmail, gmailPass);
 
-            System.out.println("logged in to: " + gmail);
-
             // opens the inbox folder
             inbox = store.getFolder("INBOX");
             inbox.open(Folder.READ_ONLY);
 
             trash = store.getFolder("[Gmail]/Trash");
             trash.open(Folder.READ_WRITE);
+
+
+            System.out.println("logged in to: " + gmail);
 
             // creates a search criterion
             SearchTerm searchCondition = new SearchTerm() {
