@@ -28,6 +28,9 @@ public class PalletTown {
     public static File proxyFile;
     public static boolean debug;
     public static int threads;
+    public static int delay;
+    public static boolean rmFormatting;
+    public static boolean useNullProxy;
 
     public static void Start(){
         parseArgs();
@@ -216,12 +219,22 @@ public class PalletTown {
 
         VBox advancedVb = (VBox) GUI.advancedRoot.getChildren().get(0);
 
-        CheckBox debugMode = (CheckBox) advancedVb.getChildren().get(0);
-        debug = debugMode.isSelected();
-
-        HBox threadbox = (HBox) advancedVb.getChildren().get(1);
+        HBox threadbox = (HBox) advancedVb.getChildren().get(0);
         TextField threadNum = (TextField) threadbox.getChildren().get(1);
         threads = threadNum.getText().equals("") ? 5 : Integer.parseInt(threadNum.getText());
+
+        HBox delayBox = (HBox) advancedVb.getChildren().get(1);
+        TextField delayNum = (TextField) threadbox.getChildren().get(1);
+        delay = delayNum.getText().equals("") ? 500 : Integer.parseInt(threadNum.getText());
+
+        CheckBox rocketMap = (CheckBox) advancedVb.getChildren().get(2);
+        rmFormatting = rocketMap.isSelected();
+
+        CheckBox useMyIP = (CheckBox) advancedVb.getChildren().get(3);
+        useNullProxy = useMyIP.isSelected();
+
+        CheckBox debugMode = (CheckBox) advancedVb.getChildren().get(4);
+        debug = debugMode.isSelected();
     }
 
     public static String millisToTime(long millis){

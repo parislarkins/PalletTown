@@ -11,12 +11,14 @@ public class PTCProxy {
     private String ip;
     private int usages = 0;
     public static final int MAX_USES = 5;
-    public static final long RESET_TIME = 660000;
+    public static final long RESET_TIME = 720000;
     private ArrayList<Long> startTimes = null;
+    public String auth;
 
 
-    PTCProxy(String ip){
+    PTCProxy(String ip, String auth){
         this.ip = ip;
+        this.auth = auth;
     }
 
 //    public void StartUsing(){

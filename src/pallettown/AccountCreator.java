@@ -29,12 +29,9 @@ public class AccountCreator implements Runnable{
 
     private static ArrayList<PTCProxy> proxies = new ArrayList<>();
 
-    private static long startTime = 0;
-    private static long endTime = 0;
-
-
     public static boolean createAccounts(String user, String pass, String plus, String captcha) {
 
+        loadProxies();
         //5 accounts per IP per 10 minutes
         username = user;
         password = pass;
@@ -43,15 +40,11 @@ public class AccountCreator implements Runnable{
 
         WORK_ITEMS = PalletTown.count;
 
-        startTime = System.currentTimeMillis();
-
-        loadProxies();
-
         if(PalletTown.captchaKey.equals("")){
             System.out.println("manual captcha");
             for (int i = 0; i < PalletTown.count; i++) {
                 PTCProxy proxy = getProxy();
-                createAccount(i, Thread.currentThread().getName(), proxy.IP());
+                createAccount(i, Thread.currentThread().getName(), proxy);
                 proxy.Use();
             }
         }else{
@@ -143,7 +136,7 @@ public class AccountCreator implements Runnable{
 
         if(PalletTown.proxyFile == null){
             System.out.println("no proxy file specified");
-            proxies.add(new PTCProxy("null"));
+            proxies.add(new PTCProxy("null", "IP"));
             return;
         }
 
@@ -157,10 +150,17 @@ public class AccountCreator implements Runnable{
                 }else if(proxy.startsWith("https://")){
                     proxy = proxy.substring(8);
                 }
-                proxies.add(new PTCProxy(proxy));
+
+                if(proxy.contains("@") && proxy.substring(0,proxy.indexOf("@")).contains(":")){
+                    String proxyIP = proxy.substring(proxy.indexOf("@") + 1);
+                    String proxyAuth = proxy.substring(0,proxy.indexOf("@"));
+                    proxies.add(new PTCProxy(proxyIP, proxyAuth));
+                }else{
+                    proxies.add(new PTCProxy(proxy,"IP"));
+                }
             }
 
-            proxies.add(new PTCProxy("null"));
+            if(PalletTown.useNullProxy) proxies.add(new PTCProxy("null", "IP"));
         } catch (FileNotFoundException e) {
             System.out.println("Invalid proxy file");
         }
@@ -176,12 +176,12 @@ public class AccountCreator implements Runnable{
             System.out.println(Thread.currentThread().getName()+" making account "+ accNum);
 
             PTCProxy proxy = getProxy();
-            createAccount(accNum,Thread.currentThread().getName(), proxy.IP());
+            createAccount(accNum,Thread.currentThread().getName(), proxy);
             System.out.println(Thread.currentThread().getName() + "done making account " + accNum + " sleeping for 500ms");
             proxy.Use();
             mytaskcount++;
             try {
-                Thread.sleep(500);
+                Thread.sleep(PalletTown.delay);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -200,7 +200,7 @@ public class AccountCreator implements Runnable{
         success++;
     }
 
-    private static void createAccount(int accNum, String name, String proxy) {
+    private static void createAccount(int accNum, String name, PTCProxy proxy) {
         String birthday = RandomDetails.randomBirthday();
 
         System.out.println("Making account #" + (accNum+1));
@@ -233,7 +233,7 @@ public class AccountCreator implements Runnable{
         System.out.println("  Password: " + accPw);
         System.out.println("  Email   : " + accMail);
 
-        boolean createAcc = createAccPy(accUser,accPw,accMail,birthday,captchaKey,name, proxy);
+        boolean createAcc = createAccPy(accUser,accPw,accMail,birthday,captchaKey,name, proxy.IP(), proxy.auth);
 
         System.out.println(createAcc ? "Account " + accNum + " created succesfully" : "Account " + accNum + " failed");
 
@@ -242,7 +242,11 @@ public class AccountCreator implements Runnable{
 
         incSuccess();
         if(PalletTown.outputFile != null)
+            if(PalletTown.rmFormatting) {
             PalletTown.outputAppend("ptc," + accUser+","+accPw);
+            }else{
+                PalletTown.outputAppend(accUser+","+accPw);
+            }
 
         if(PalletTown.acceptTos)
             TOSAccept.acceptTos(accUser,password,accMail);
@@ -254,30 +258,8 @@ public class AccountCreator implements Runnable{
 //        createAccPy("palletttrainer10","J@kolantern7","miminpari+pallettrainer10@hotmail.com","1957-1-1","5d579f38e793dc5b3d4905540a4215fa", name);
 //    }
 
-    private static boolean createAccPy(String username, String password, String email, String dob, String captchaKey, String name, String proxy){
+    private static boolean createAccPy(String username, String password, String email, String dob, String captchaKey, String name, String proxy, String authType){
         try{
-
-//                    String.format("create_account(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",60)\n",username,password,email,dob,captchaKey);
-
-//            StringWriter writer = new StringWriter(); //ouput will be stored here
-//
-//            ScriptEngineManager manager = new ScriptEngineManager();
-//            ScriptContext context = new SimpleScriptContext();
-//
-//            context.setWriter(writer); //configures output redirection
-//            ScriptEngine engine = manager.getEngineByName("python");
-//
-//
-//            engine.eval(prg, context);
-//            System.out.println(writer.toString());
-//
-//            PythonInterpreter interpreter = new PythonInterpreter();
-//            interpreter.exec(prg);
-//            // execute a function that takes a string and returns a string
-//            PyObject someFunc = interpreter.get("create_account");
-//            PyObject result = someFunc.__call__(new PyString[] {new PyString(username),new PyString(password), new PyString(email), new PyString(dob), new PyString(captchaKey)});
-//            String realResult = (String) result.__tojava__(String.class);
-
             if(captchaKey.isEmpty()) captchaKey = "null";
 
             if(proxy.isEmpty()) proxy = "null";
@@ -291,15 +273,10 @@ public class AccountCreator implements Runnable{
                     dob,
                     captchaKey,
                     name,
-                    proxy
+                    proxy,
+                    authType
             };
 
-//            for (String command : commands) {
-//                System.out.println(command);
-//            }
-
-//            ProcessBuilder pb = new ProcessBuilder("python", "accountcreate.py " + username + " " + password + " " + email +
-//                    " " + dob + " \"\" " + name + " " + " \"\" ");
             ProcessBuilder pb = new ProcessBuilder(commands);
 
             pb.redirectErrorStream(true);
@@ -318,14 +295,6 @@ public class AccountCreator implements Runnable{
 
             Scanner in = new Scanner(new InputStreamReader(p.getInputStream()));
 
-//            Timer timer = new Timer(120000, new ActionListener() {
-//                @Override
-//                public void actionPerformed(ActionEvent arg0) {
-//                }
-//            });
-//            timer.setRepeats(false); // Only execute once
-//            timer.start(); // Go go go!
-
             String line = "dud";
             while(in.hasNext()){
                 line = in.nextLine();
@@ -335,7 +304,7 @@ public class AccountCreator implements Runnable{
 
 
             System.out.println(line);
-            if (line.contains("Account successfully created."))
+            if (line.contains(" successfully created."))
                 return true;
 //
         }catch(Exception e){
