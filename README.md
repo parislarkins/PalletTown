@@ -265,3 +265,22 @@ For address myaddress@domain.com, send an email to myaddress+1234@domain.com, yo
 If it doesn't arrive in your email, your email service does not support the plusmail trick, and you'll need a different email to use Pallet Town.
 
 #### <a name="hotmail-forwarding"></a> How do I automatically forward emails from Hotmail to Gmail?
+
+##### If you've already received at least 1 activation email in your hotmail
+1. Log into your hotmail account.
+2. Click on an activation email from niantic
+3. At the top of the window, click the three dots on the far right
+![Three dot button](images/hotmail-threedots.png)
+4. Click the "Create rule..." option
+![Create rule option](images/hotmail-createrule.png)
+5. Remove the middle condition so that only received from, and matches subject remain
+![Forwarding conditions](images/hotmail-conditions.png)
+6. Click the drop down under do all of the following, then "Forward, redirect or send", and then "Forward the message to..."
+![Forward the message to](images/hotmail-forwardto.png)
+7. Enter your gmail address in the box that appears, and click ok, then ok again to create the rule.
+
+Done!
+
+##### If you haven't received at least 1 activation email in your hotmail
+
+TBA
