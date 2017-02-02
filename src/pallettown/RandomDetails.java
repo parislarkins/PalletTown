@@ -36,7 +36,7 @@ public class RandomDetails {
         LocalDate randomDate = LocalDate.ofEpochDay(randomDay);
         
         DateTimeFormatter yearlyFormat = DateTimeFormatter
-				.ofPattern("yyyy-MM-dd0");
+				.ofPattern("yyyy-MM-dd");
         
         return randomDate.format(yearlyFormat);
     }
