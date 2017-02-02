@@ -160,7 +160,20 @@ Currently without running it from terminal the program will just freeze until it
 
 ### <a name="mac-install"></a> Mac
 
-Mac installation instructions are yet to be written.
+Detailed instructions not written yet, however, if you install the following dependencies, it should work:
+
+- [Java JRE](https://java.com/en/download/)
+- [Google Chrome](https://www.google.com.au/chrome/browser/)
+- [Python 2.7.12+](https://www.python.org/ftp/python/2.7.13/python-2.7.13.msi)
+- [Selenium](http://selenium-python.readthedocs.io/installation.html)
+- [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/downloads)
+- [PhantomJS (For 2captcha creation)](http://selenium-python.readthedocs.io/installation.html)
+
+**To launch**
+
+Either double click on the Jar, or run through terminal with:
+
+`java -jar PalletTown.jar`
 
 ## <a name="usage"></a> Usage
 
@@ -201,8 +214,10 @@ All you have to do is wait for the captcha to appear, and solve it.
 - Click the Proxy File field, which will open a file browser (It may take a while on some systems)
 - Select your proxy file. It should be formatted as 1 proxy per line, eg:
     ```
-    13.41.123.231:23123
-    14.51.233.135:23321
+    https://13.41.123.231:23123
+    http://14.51.233.135:23321
+    11.52.231.136:23321
+    https://username:password@12.13.145.251:21313
     ```
 - Click Create Accounts
 
@@ -234,19 +249,21 @@ All you have to do is wait for the captcha to appear, and solve it.
 - Enter the number 10 into the Number of accounts field.
 - Enter your 2Captcha key into the 2Captcha Key field.
 - Check the Auto Verify Accounts box.
-- Enter your Gmail account username. (eg: mygmail@gmail.com)
+- Enter your email account for auto verify. (eg: myaddress@hotmail.com, or mygmail@gmail.com if you've set up forwarding to gmail)
 - Enter your Gmail account password.
 - Click the Output File field, which will open up a file browser (It may take a while on some systems)
 - Select your output file
 - Click the Proxy File field, which will open a file browser (It may take a while on some systems)
 - Select your proxy file. It should be formatted as 1 proxy per line, eg:
     ```
-    13.41.123.231:23123
-    14.51.233.135:23321
+    https://13.41.123.231:23123
+    http://14.51.233.135:23321
+    11.52.231.136:23321
+    https://username:password@12.13.145.251:21313
     ```
 - Click Create Accounts
 
-![Create 10 accounts with random details, using 2Captcha, automatic Gmail verification, save to file, and use proxy list](images/10-random-2captcha-gmailav-proxies-save.jpg)
+![Create 10 accounts with random details, using 2Captcha, automatic verification, save to file, and use proxy list](images/10-random-2captcha-gmailav-proxies-save.jpg)
 
 ## <a name="faq"></a> FAQ
 
@@ -265,6 +282,8 @@ For address myaddress@domain.com, send an email to myaddress+1234@domain.com, yo
 If it doesn't arrive in your email, your email service does not support the plusmail trick, and you'll need a different email to use Pallet Town.
 
 #### <a name="hotmail-forwarding"></a> How do I automatically forward emails from Hotmail to Gmail?
+
+***NOTE: Hotmail to Gmail forwarding is no longer required! Simply use your hotmail address in the auto verification box***
 
 ##### If you've already received at least 1 activation email in your hotmail
 1. Log into your hotmail account.

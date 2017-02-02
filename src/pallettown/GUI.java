@@ -2,20 +2,32 @@ package pallettown;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+
+import static pallettown.PalletTown.*;
 
 /**
  * Created by Paris on 20/01/2017.
@@ -25,6 +37,8 @@ public class GUI extends Application{
     private static final int VIEWER_WIDTH = 500;
     private static final int VIEWER_HEIGHT = 500;
 
+    public static ObservableList<AccountThread> accountThreads = FXCollections.observableArrayList();
+
     private Group mainRoot = new Group();
     static Group controls = new Group();
     private Stage primaryStage;
@@ -33,8 +47,11 @@ public class GUI extends Application{
     static Group advancedControls = new Group();
     private Stage advancedStage = null;
     private Scene advancedScene;
-    private TextArea textArea;
+    public static TextArea textArea;
+    private static TableView table;
 
+    private static Calendar cal = Calendar.getInstance();
+    static SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -51,6 +68,8 @@ public class GUI extends Application{
         viewBG.setImage(background);
 
         mainRoot.getChildren().add(controls);
+
+        loadSettings();
 
         makeControls();
 
@@ -403,6 +422,12 @@ public class GUI extends Application{
                     "        log (threadname,\"trying to validate response\")\n" +
                     "        _validate_response(driver)\n" +
                     "        log (threadname,\"validated response\")\n" +
+                    "    except PTCRateLimitExceededException:\n" +
+                    "        log(threadname,\"Failed to create user: {}\".format(username) + \"exiting...\")\n" +
+                    "        driver.close()\n" +
+                    "        driver.quit()\n" +
+                    "        log(threadname, \"IP rate limit exceeded, account failed.\")\n" +
+                    "        return False\n" +
                     "    except PTCException:\n" +
                     "        log(threadname,\"Failed to create user: {}\".format(username) + \"exiting...\")\n" +
                     "        driver.close()\n" +
@@ -438,43 +463,44 @@ public class GUI extends Application{
 
         Label plusMaillabel = new Label("Email:");
 
-        final TextField plusMail = new TextField();
-        plusMail.setPromptText("Enter plusmail compatible email (no gmail)");
-        plusMail.setPrefWidth(350);
+        final TextField plusMailText = new TextField(plusMail == null ? "" : plusMail);
+        plusMailText.setPromptText("Enter plusmail compatible email (no gmail)");
+        plusMailText.setPrefWidth(350);
 
         HBox mail = new HBox();
         mail.setAlignment(Pos.CENTER_RIGHT);
-        mail.getChildren().addAll(plusMaillabel, plusMail);
+        mail.getChildren().addAll(plusMaillabel, plusMailText);
         mail.setSpacing(10);
 
         mainVb.getChildren().add(mail);
 
         Label userLabel = new Label("Username:");
 
-        final TextField userName = new TextField();
-        userName.setPromptText("Enter account username");
-        userName.setPrefWidth(350);
+        final TextField userNameText = new TextField(userName == null ? "" : plusMail);
+        userNameText.setPromptText("Enter account username");
+        userNameText.setPrefWidth(350);
         HBox user = new HBox();
         user.setAlignment(Pos.CENTER_RIGHT);
-        user.getChildren().addAll(userLabel, userName);
+        user.getChildren().addAll(userLabel, userNameText);
         user.setSpacing(10);
 
         mainVb.getChildren().add(user);
 
         Label passLabel = new Label("Password:");
 
-        final TextField password = new TextField();
-        password.setPrefWidth(350);
-        password.setPromptText("Enter account password to use");
+        final TextField passwordText = new TextField(password == null ? "" : password);
+        passwordText.setPrefWidth(350);
+        passwordText.setPromptText("Enter account password to use");
         HBox pass = new HBox();
         pass.setAlignment(Pos.CENTER_RIGHT);
-        pass.getChildren().addAll(passLabel,password);
+        pass.getChildren().addAll(passLabel,passwordText);
         pass.setSpacing(10);
 
         mainVb.getChildren().add(pass);
 
         Label numLabel = new Label("Number of accounts:");
-        final TextField numAccounts = new TextField();
+
+        final TextField numAccounts = new TextField(Integer.toString(count));
         numAccounts.setPrefWidth(350);
         numAccounts.setPromptText("Number of accounts to create.");
         numAccounts.setText("1");
@@ -486,55 +512,63 @@ public class GUI extends Application{
         mainVb.getChildren().add(num);
 
         Label startLabel = new Label("Start number:");
-        final TextField startNum = new TextField();
-        startNum.setPrefWidth(350);
-        startNum.setPromptText("Starting number");
+
+        final TextField startNumText;
+
+        if(startNum != null)
+            startNumText= new TextField(Integer.toString(startNum));
+        else
+            startNumText = new TextField();
+
+        startNumText.setPrefWidth(350);
+        startNumText.setPromptText("Starting number");
         HBox start = new HBox();
         start.setAlignment(Pos.CENTER_RIGHT);
-        start.getChildren().addAll(startLabel,startNum);
+        start.getChildren().addAll(startLabel,startNumText);
         start.setSpacing(10);
 
         mainVb.getChildren().add(start);
 
         Label captchaLabel = new Label("2Captcha Key:");
-        final TextField captchaKey = new TextField();
-        captchaKey.setPrefWidth(350);
-        captchaKey.setPromptText("Enter 2Captcha Key");
+        final TextField captchaKeyText = new TextField(captchaKey);
+        captchaKeyText.setPrefWidth(350);
+        captchaKeyText.setPromptText("Enter 2Captcha Key");
         HBox captcha = new HBox();
         captcha.setAlignment(Pos.CENTER_RIGHT);
-        captcha.getChildren().addAll(captchaLabel,captchaKey);
+        captcha.getChildren().addAll(captchaLabel,captchaKeyText);
         captcha.setSpacing(10);
 
         mainVb.getChildren().add(captcha);
 
-        CheckBox autoVerify = new CheckBox("Auto Verify Accounts");
-        mainVb.getChildren().add(autoVerify);
+        CheckBox autoVerifyBox = new CheckBox("Auto Verify Accounts");
+        autoVerifyBox.setSelected(autoVerify);
+        mainVb.getChildren().add(autoVerifyBox);
 
-        Label gmailLabel = new Label("Gmail Account:");
+        Label avMailLabel = new Label("Email account for auto verification:");
 
-        final TextField gmail = new TextField();
-        gmail.setPromptText("Gmail account for auto verification");
-        gmail.setPrefWidth(350);
+        final TextField avMailText = new TextField(avMail);
+        avMailText.setPromptText("Email account for auto verification");
+        avMailText.setPrefWidth(350);
 
-        HBox gm = new HBox();
-        gm.setAlignment(Pos.CENTER_RIGHT);
-        gm.getChildren().addAll(gmailLabel, gmail);
-        gm.setSpacing(10);
+        HBox av = new HBox();
+        av.setAlignment(Pos.CENTER_RIGHT);
+        av.getChildren().addAll(avMailLabel, avMailText);
+        av.setSpacing(10);
 
-        mainVb.getChildren().add(gm);
+        mainVb.getChildren().add(av);
 
-        Label gmPassLabel = new Label("Gmail Password:");
+        Label avPassLabel = new Label("Email password for auto verification:");
 
-        final TextField gmailPass = new TextField();
-        gmailPass.setPromptText("Gmail account password for auto verification");
-        gmailPass.setPrefWidth(350);
+        final TextField avPassText = new TextField(avPass);
+        avPassText.setPromptText("Email account password for auto verification");
+        avPassText.setPrefWidth(350);
 
-        HBox gmPw = new HBox();
-        gmPw.setAlignment(Pos.CENTER_RIGHT);
-        gmPw.getChildren().addAll(gmPassLabel, gmailPass);
-        gmPw.setSpacing(10);
+        HBox avPw = new HBox();
+        avPw.setAlignment(Pos.CENTER_RIGHT);
+        avPw.getChildren().addAll(avPassLabel, avPassText);
+        avPw.setSpacing(10);
 
-        mainVb.getChildren().add(gmPw);
+        mainVb.getChildren().add(avPw);
 
         CheckBox acceptTos = new CheckBox("Accept account TOS");
         acceptTos.setDisable(true);
@@ -553,50 +587,62 @@ public class GUI extends Application{
 
         Label outputLabel = new Label("Output File:");
 
-        TextField outputFile = new TextField();
-        outputFile.setPrefWidth(350);
+        TextField outputFileText;
+
+        if(outputFile != null)
+            outputFileText = new TextField(outputFile.getAbsolutePath());
+        else
+            outputFileText = new TextField();
+
+        outputFileText.setPrefWidth(350);
 
         Button clearOutput = new Button("Clear");
         clearOutput.setOnAction(event -> {
-            outputFile.clear();
+            outputFileText.clear();
         });
 
         HBox output = new HBox();
         output.setAlignment(Pos.CENTER_RIGHT);
-        output.getChildren().addAll(outputLabel, outputFile,clearOutput);
+        output.getChildren().addAll(outputLabel, outputFileText,clearOutput);
         output.setSpacing(10);
 
         mainVb.getChildren().add(output);
 
         File[] file = new File[1];
 
-        outputFile.setOnMouseClicked(event -> {
+        outputFileText.setOnMouseClicked(event -> {
             file[0] = fileChooser.showOpenDialog(primaryStage);
             if (file[0] != null) {
-                outputFile.setText(file[0].getAbsolutePath());
+                outputFileText.setText(file[0].getAbsolutePath());
             }
         });
 
         Label proxyLabel = new Label("Proxy File");
 
-        TextField proxyFile = new TextField();
-        proxyFile.setPrefWidth(350);
+        TextField proxyFileText;
+
+        if(proxyFile != null)
+            proxyFileText = new TextField(proxyFile.getAbsolutePath());
+        else
+            proxyFileText = new TextField();
+
+        proxyFileText.setPrefWidth(350);
 
         Button clearProxy = new Button("Clear");
         clearProxy.setOnAction(event -> {
-            proxyFile.clear();
+            proxyFileText.clear();
         });
 
         HBox proxy = new HBox();
         proxy.setAlignment(Pos.CENTER_RIGHT);
-        proxy.getChildren().addAll(proxyLabel, proxyFile,clearProxy);
+        proxy.getChildren().addAll(proxyLabel, proxyFileText,clearProxy);
         proxy.setSpacing(10);
 
         mainVb.getChildren().add(proxy);
 
         File[] pFile = new File[1];
 
-        proxyFile.setOnMouseClicked(event -> {
+        proxyFileText.setOnMouseClicked(event -> {
             fileChooser.setTitle("Select proxy file");
             fileChooser.getExtensionFilters().removeAll();
             fileChooser.getExtensionFilters().add(
@@ -605,7 +651,7 @@ public class GUI extends Application{
             fileChooser.setSelectedExtensionFilter(fileChooser.getExtensionFilters().get(1));
             pFile[0] = fileChooser.showOpenDialog(primaryStage);
             if (pFile[0] != null) {
-                proxyFile.setText(pFile[0].getAbsolutePath());
+                proxyFileText.setText(pFile[0].getAbsolutePath());
             }
         });
 
@@ -614,9 +660,67 @@ public class GUI extends Application{
         mainVb.getChildren().add(advanced);
 
         Button submit = new Button("Create accounts");
-        submit.setOnAction(event -> PalletTown.Start());
+        submit.setOnAction(event -> {
+
+            if(!captchaKeyText.getText().isEmpty()){
+                table.setVisible(true);
+            }
+
+            PalletTown palletTown = new PalletTown();
+
+            Thread thread = new Thread(palletTown, "Main Thread");
+            thread.start();
+//            PalletTown.Start();
+        });
         mainVb.getChildren().add(submit);
 
+        table = new TableView();
+        table.setEditable(false);
+        table.setMaxWidth(350);
+
+        table.setMaxHeight(160);
+
+        TableColumn threadNameCol = new TableColumn("Thread");
+        threadNameCol.setCellValueFactory(
+            new PropertyValueFactory<AccountThread,String>("threadName")
+        );
+        threadNameCol.prefWidthProperty().bind(table.widthProperty().multiply(0.2));
+        threadNameCol.setResizable(false);
+
+        TableColumn successCol = new TableColumn("Success");
+        successCol.setCellValueFactory(
+                new PropertyValueFactory<AccountThread,Integer>("successes")
+        );
+        successCol.prefWidthProperty().bind(table.widthProperty().multiply(0.15));
+        threadNameCol.setResizable(false);
+
+        TableColumn failureCol = new TableColumn("Fail");
+        failureCol.setCellValueFactory(
+                new PropertyValueFactory<AccountThread,Integer>("failures")
+        );
+        failureCol.prefWidthProperty().bind(table.widthProperty().multiply(0.1));
+        failureCol.setResizable(false);
+
+        TableColumn timeCol = new TableColumn("Time");
+        timeCol.setCellValueFactory(
+                new PropertyValueFactory<AccountThread,String>("latestTime")
+        );
+        timeCol.prefWidthProperty().bind(table.widthProperty().multiply(0.2));
+        timeCol.setResizable(false);
+
+        TableColumn messageCol = new TableColumn("Message");
+        messageCol.setCellValueFactory(
+                new PropertyValueFactory<AccountThread,String>("latestMessage")
+        );
+        messageCol.prefWidthProperty().bind(table.widthProperty().multiply(0.343));
+        messageCol.setResizable(false);
+
+
+        table.setItems(accountThreads);
+        table.getColumns().addAll(threadNameCol, successCol, failureCol,timeCol, messageCol);
+        table.setVisible(false);
+
+        mainVb.getChildren().add(table);
         controls.getChildren().add(mainVb);
     }
 
@@ -649,72 +753,157 @@ public class GUI extends Application{
 
         Label threadsLabel = new Label("Threads:");
 
-        final TextField threads = new TextField("5");
-        threads.setPrefWidth(50);
+        final TextField threadsText = new TextField(Integer.toString(threads));
+        threadsText.setPrefWidth(50);
 
         HBox thrds = new HBox();
         thrds.setAlignment(Pos.CENTER_RIGHT);
-        thrds.getChildren().addAll(threadsLabel,threads);
+        thrds.getChildren().addAll(threadsLabel,threadsText);
         thrds.setSpacing(10);
 
         vb.getChildren().add(thrds);
 
         Label delayLabel = new Label("Delay between accounts (ms):");
 
-        final TextField delay = new TextField("500");
-        delay.setPrefWidth(80);
+        final TextField delayText = new TextField(Integer.toString(delay));
+        delayText.setPrefWidth(80);
 
         HBox del = new HBox();
         del.setAlignment(Pos.CENTER_RIGHT);
-        del.getChildren().addAll(delayLabel,delay);
+        del.getChildren().addAll(delayLabel,delayText);
         del.setSpacing(10);
 
         vb.getChildren().add(del);
 
         CheckBox rocketMap = new CheckBox("RocketMap output formatting");
-        rocketMap.setSelected(true);
+        rocketMap.setSelected(rmFormatting);
         vb.getChildren().add(rocketMap);
 
         CheckBox useMyIP = new CheckBox("Use my IP as well as proxies");
-        useMyIP.setSelected(true);
+        useMyIP.setSelected(useNullProxy);
         vb.getChildren().add(useMyIP);
 
-        CheckBox debug = new CheckBox("Debug Mode");
-        vb.getChildren().add(debug);
+        CheckBox debugBox = new CheckBox("Debug Mode");
+        debugBox.setSelected(debug);
+        vb.getChildren().add(debugBox);
 
-//        textArea = new TextArea();
-//        textArea.setEditable(false);
+        textArea = new TextArea();
+        textArea.setEditable(false);
+        textArea.setPrefHeight(500);
 
-//        redirectSystemStreams();
-//        vb.getChildren().add(textArea);
+        Console console = new Console(textArea);
+        PrintStream ps = new PrintStream(console,true);
+        System.setOut(ps);
+        System.setErr(ps);
+
+        vb.getChildren().add(textArea);
     }
 
-    private void updateTextArea(final String text) {
-        Platform.runLater(() -> textArea.appendText(text));
+    synchronized
+    public static void addThread(AccountThread accountThread) {
+        accountThreads.add(accountThread);
     }
 
-    private void redirectSystemStreams() {
-        OutputStream out = new OutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-                updateTextArea(String.valueOf((char) b));
-            }
+    public static void showAlert(Alert.AlertType warning, String title, String headerText, String verify) {
+        Alert alert = new Alert(warning);
+        alert.setTitle(title);
+        alert.setHeaderText(headerText);
+        alert.setContentText(verify);
+        alert.show();
+    }
 
-            @Override
-            public void write(byte[] b, int off, int len) throws IOException {
-                updateTextArea(new String(b, off, len));
-            }
+    public static String currentTime(){
+        cal = Calendar.getInstance();
+        return sdf.format(cal.getTime());
+    }
 
-            @Override
-            public void write(byte[] b) throws IOException {
-                write(b, 0, b.length);
-            }
-        };
+    synchronized
+    public static void Log(String s){
+        System.out.println("[" + currentTime() + "] " + s);
+    }
 
-        System.setOut(new PrintStream(out, true));
-        System.setErr(new PrintStream(out, true));
+    public static class Console extends OutputStream {
 
-        System.out.println("test");
+        private TextArea output;
+
+        public Console(TextArea ta) {
+            this.output = ta;
+        }
+
+        @Override
+        public void write(int i) throws IOException {
+            Platform.runLater(() -> output.appendText(String.valueOf((char) i)));
+        }
+    }
+
+    public static class AccountThread {
+
+        private final SimpleStringProperty threadName;
+        private SimpleStringProperty latestTime;
+        private SimpleStringProperty latestMessage;
+        private SimpleIntegerProperty successes = new SimpleIntegerProperty(0);
+        private SimpleIntegerProperty failures = new SimpleIntegerProperty(0);
+        private final ArrayList<Pair<String, String>> messages = new ArrayList<>();
+
+        public AccountThread(String name){
+            threadName = new SimpleStringProperty(name);
+        }
+
+        public void LogMessage(String message){
+            String time = currentTime();
+            messages.add(new Pair<>(time, message));
+
+            latestTime = new SimpleStringProperty(time);
+            latestMessage = new SimpleStringProperty(message);
+
+            table.refresh();
+        }
+
+        public void Success(){
+            successes.setValue(successes.get()+1);
+            table.refresh();
+        }
+
+        public void Failure(){
+            failures.setValue(failures.get()+1);
+            table.refresh();
+        }
+
+        public Pair<String,String> LatestMessage(){
+            return messages.get(messages.size()-1);
+        }
+
+        public String getThreadName(){
+            return threadName.get();
+        }
+
+        public String getLatestTime(){
+            return latestTime.get();
+        }
+
+        public String getLatestMessage(){
+            return latestMessage.get();
+        }
+
+        public Integer getFailuresProperty(){ return failures.get();}
+
+        public Integer getSuccessesProperty() { return successes.get();}
+
+        public StringProperty threadNameProperty(){
+            return threadName;
+        }
+
+        public StringProperty latestMessageProperty(){
+            return latestMessage;
+        }
+
+        public StringProperty latestTimeProperty(){
+            return latestTime;
+        }
+
+        public IntegerProperty successesProperty(){ return successes;}
+
+        public IntegerProperty failuresProperty(){return failures;}
     }
 
 }

@@ -5,11 +5,13 @@ import javax.mail.search.SearchTerm;
 import java.io.IOException;
 import java.util.Properties;
 
+import static pallettown.GUI.Log;
+
 /**
  * Created by Paris on 20/01/2017.
  */
 
-public class GmailVerifier {
+public class EmailVerifier {
 
     static Properties mailServerProperties = new Properties();
     static Session getMailSession;
@@ -18,29 +20,51 @@ public class GmailVerifier {
 
     public static Folder trash;
 
-    private static final String HOST = "imap.gmail.com";
+    private static final String GMAIL_HOST = "imap.avMail.com";
+//    private static final String GMAIL_PORT = "993";
+
+    private static final String HOTMAIL_HOST = "imap-mail.outlook.com";
+//    private static final String HOTMAIL_PORT = ""
     private static Folder inbox;
 
-    public static void verify(String gmail, String gmailPass, int accounts) {
+    private static final Flags deleted = new Flags(Flags.Flag.DELETED);
 
-        mailServerProperties.put("mail.imap.host", HOST);
+    public static void verify(String email, String emailPass, int accounts) {
+
+        String host;
+//        String port;
+
+        if(email.contains("@avMail.com")){
+            host = GMAIL_HOST;
+//            port = "993";
+        }else if (email.contains("@hotmail.com")){
+            host = HOTMAIL_HOST;
+        }else{
+            Log("invalid email, please use hotmail or avMail");
+            return;
+        }
+
+        mailServerProperties.put("mail.imap.host", host);
         mailServerProperties.put("mail.imap.port", "993");
         mailServerProperties.put("mail.imap.starttls.enable", "true");
         getMailSession = Session.getDefaultInstance(mailServerProperties, null);
 
         try {
             store = getMailSession.getStore("imaps");
-            store.connect(HOST, gmail, gmailPass);
+            store.connect(host, email, emailPass);
 
             // opens the inbox folder
             inbox = store.getFolder("INBOX");
-            inbox.open(Folder.READ_ONLY);
+            inbox.open(Folder.READ_WRITE);
 
-            trash = store.getFolder("[Gmail]/Trash");
+            if(host.equals(GMAIL_HOST))
+                trash = store.getFolder("[Gmail]/Trash");
+            else
+                trash = store.getFolder("Deleted");
             trash.open(Folder.READ_WRITE);
 
 
-            System.out.println("logged in to: " + gmail);
+            Log("logged in to: " + email);
 
             // creates a search criterion
             SearchTerm searchCondition = new SearchTerm() {
@@ -63,14 +87,14 @@ public class GmailVerifier {
             processMail(foundMessages);
 
             if(foundMessages.length < accounts){
-                System.out.println("Not all verification emails received in time");
-                System.out.println("Waiting another 3 minutes then trying again");
+                Log("Not all verification emails received in time");
+                Log("Waiting another 3 minutes then trying again");
                 inbox.close(true);
                 store.close();
 
                 Thread.sleep(180000);
 
-                verify(gmail,gmailPass,accounts - foundMessages.length);
+                verify(email,emailPass,accounts - foundMessages.length);
             }
         } catch (NoSuchProviderException e) {
             e.printStackTrace();
@@ -84,20 +108,19 @@ public class GmailVerifier {
     }
 
     private static void processMail(Message[] foundMessages) {
-        System.out.println("Processing " +foundMessages.length + " emails");
+        Log("Processing " +foundMessages.length + " emails");
 
 
         if(foundMessages.length == 0){
-            System.out.println("no emails found");
+            Log("no emails found");
             return;
         }
-
 
         for (Message message : foundMessages) {
             try {
 //                assert message.getFrom().equals("noreply@pokemon.com");
 
-                String content = GmailInbox.getMailText(message);
+                String content = getMailText(message);
 
                 int validkey_index = content.indexOf("https://club.pokemon.com/us/pokemon-trainer-club/activated/");
 
@@ -108,18 +131,22 @@ public class GmailVerifier {
                     validlink = validlink.replace(">","");
                     validlink = validlink.replace("=","");
 
-                    System.out.println(validlink);
+                    Log(validlink);
                     String validate_response = "Failed";
 
                     while(validate_response.equals("Failed")){
                         validate_response = UrlUtil.openUrl(validlink, true);
                     }
 
-                    System.out.println(validate_response);
+                    Log(validate_response);
 
-                    System.out.println("Verified email and trashing, validate key: " + validlink.substring(60) + "\n");
+                    Log("Verified email and trashing, validate key: " + validlink.substring(60) + "\n");
 
-                    inbox.copyMessages(new Message[] {message},trash);
+                    Message[] messageArr = new Message[] {message};
+
+                    inbox.copyMessages(messageArr,trash);
+
+                    inbox.setFlags(messageArr,deleted,true);
 
                 }
 
@@ -133,5 +160,27 @@ public class GmailVerifier {
 
         }
 
+    }
+
+    /*
+* This method checks for content-type
+* based on which, it processes and
+* fetches the content of the message
+*/
+    public static String getMailText(Part p) throws Exception {
+
+        //check if the content is plain text
+        if (p.isMimeType("text/plain")) {
+            return((String) p.getContent());
+        }
+        //check if the content has attachment
+        else if (p.isMimeType("multipart/*")) {
+            Multipart mp = (Multipart) p.getContent();
+            int count = mp.getCount();
+            for (int i = 0; i < count; i++)
+                return getMailText(mp.getBodyPart(i));
+        }
+
+        return "";
     }
 }

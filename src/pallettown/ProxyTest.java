@@ -27,7 +27,7 @@ public class ProxyTest implements Runnable {
     public void TestProxies(){
 
         for (int i = 0; i < ips.length; i++) {
-            proxies[i] = new PTCProxy(ips[i]);
+            proxies[i] = new PTCProxy(ips[i], "IP");
         }
 
         ProxyTest pxyTest = new ProxyTest();

@@ -1,18 +1,24 @@
 package pallettown;
 
-import javafx.scene.control.*;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.io.*;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static pallettown.GUI.Log;
+
 /**
  * Created by Paris on 20/01/2017.
  */
-public class PalletTown {
+public class PalletTown implements Runnable {
 
     public static String plusMail;
     public static String userName;
@@ -21,19 +27,22 @@ public class PalletTown {
     public static int count;
     public static String captchaKey;
     public static boolean autoVerify;
-    public static String gmail;
-    public static String gmailPass;
+    public static String avMail;
+    public static String avPass;
     public static boolean acceptTos;
     public static File outputFile;
     public static File proxyFile;
-    public static boolean debug;
-    public static int threads;
-    public static int delay;
-    public static boolean rmFormatting;
-    public static boolean useNullProxy;
+    public static boolean debug = false;
+    public static int threads = 5;
+    public static int delay = 500;
+    public static boolean rmFormatting = true;
+    public static boolean useNullProxy = true;
+    private static File settingsFile = new File("pallettown.config");
 
     public static void Start(){
         parseArgs();
+
+        saveSettings();
 
         AccountCreator.success = 0;
 
@@ -51,7 +60,7 @@ public class PalletTown {
 //                                  ".\nDo you wish to proceed?");
 //            alert.showAndWait().ifPresent(rs -> {
 //                if (rs == no) {
-//                    System.out.println("cancel");
+//                    Log("cancel");
 //                }
 //            });
 //        }
@@ -59,12 +68,8 @@ public class PalletTown {
         String verify = verifySettings();
 
         if(!verify.equals("valid")){
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Input Error");
-            alert.setHeaderText(null);
-            alert.setContentText(verify);
-            alert.show();
-            System.out.println("aborting...");
+            Platform.runLater(() -> GUI.showAlert(Alert.AlertType.WARNING,"Input Error", null, verify));
+            Log("aborting...");
             return;
         }
 
@@ -72,18 +77,18 @@ public class PalletTown {
 //            outputAppend("\nThe following accounts use the email address: " + plusMail + "\n");
         }
 
-        System.out.println("Starting");
+        Log("Starting");
 
         AccountCreator.createAccounts(userName,password,plusMail,captchaKey);
 
-        System.out.println(AccountCreator.success + "/" + count + " successes");
+        Log(AccountCreator.success + "/" + count + " successes");
 
         if(AccountCreator.success == 0)
             return;
 
-        if(autoVerify && !gmail.equals("") && !gmailPass.equals("")){
-            System.out.println("Account Creation done");
-            System.out.println("Waiting 4 minutes for forwarded emails to arrive");
+        if(autoVerify && !avMail.equals("") && !avPass.equals("")){
+            Log("Account Creation done");
+            Log("Waiting 4 minutes for forwarded emails to arrive");
 
             try {
                 Thread.sleep(24000);
@@ -91,9 +96,9 @@ public class PalletTown {
                 e.printStackTrace();
             }
 
-            System.out.println("Verifying accounts...");
-            GmailVerifier.verify(gmail,gmailPass,AccountCreator.success);
-            System.out.println("Done!");
+            Log("Verifying accounts...");
+            EmailVerifier.verify(avMail, avPass,AccountCreator.success);
+            Log("Done!");
         }
 
     }
@@ -145,8 +150,8 @@ public class PalletTown {
         if((startNum == null || startNum == 0) && count > 1 && userName != null)
             return "To create more than 1 account, specify a start number";
 
-        if(autoVerify && (gmail.equals("") || gmailPass.equals("") || !gmail.contains("@gmail.com")))
-            return "Check gmail account/password are correct";
+        if(autoVerify && (avMail.equals("") || avPass.equals("") || (!avMail.contains("@gmail.com") && !avMail.contains("@hotmail.com"))))
+            return "Check auto verify account/password are correct (Use hotmail or gmail)";
 
         return "valid";
     }
@@ -198,13 +203,13 @@ public class PalletTown {
         CheckBox autoV = (CheckBox) vb.getChildren().get(6);
         autoVerify = autoV.isSelected();
 
-        HBox gm = (HBox) vb.getChildren().get(7);
-        TextField gma = (TextField) gm.getChildren().get(1);
-        gmail = gma.getText();
+        HBox avM = (HBox) vb.getChildren().get(7);
+        TextField avMText = (TextField) avM.getChildren().get(1);
+        avMail = avMText.getText();
 
-        HBox gp = (HBox) vb.getChildren().get(8);
-        TextField gmpw = (TextField) gp.getChildren().get(1);
-        gmailPass = gmpw.getText();
+        HBox avP = (HBox) vb.getChildren().get(8);
+        TextField avPText = (TextField) avP.getChildren().get(1);
+        avPass = avPText.getText();
 
         CheckBox tos = (CheckBox) vb.getChildren().get(9);
         acceptTos = tos.isSelected();
@@ -237,11 +242,147 @@ public class PalletTown {
         debug = debugMode.isSelected();
     }
 
+    public static void loadSettings(){
+
+        if(!settingsFile.exists()){
+            System.out.println("no settings file exists");
+            return;
+        }
+
+        try {
+            Scanner in = new Scanner(settingsFile);
+
+            while(in.hasNext()){
+                String line = in.nextLine();
+
+                String argName = line.substring(0,line.indexOf(":"));
+                String value = line.substring(line.indexOf(":") + 1);
+
+                switch (argName){
+                    case "plusMail":
+                        plusMail = value;
+                        break;
+                    case "userName":
+                        userName = value.equals("null") ? null : value;
+                        break;
+                    case "password":
+                        password = value.equals("null") ? null : value;
+                        break;
+                    case "startNum":
+                        startNum = value.equals("null") ? null : Integer.parseInt(value);
+                        break;
+                    case "count":
+                        count = value.equals("null") ? null : Integer.parseInt(value);
+                        break;
+                    case "captchaKey":
+                        captchaKey = value.equals("null") ? null : value;
+                        break;
+                    case "autoVerify":
+                        autoVerify = Boolean.parseBoolean(value);
+                        break;
+                    case "avMail":
+                        avMail = value.equals("null") ? null : value;
+                        break;
+                    case "avPass":
+                        avPass = value.equals("null") ? null : value;
+                        break;
+                    case "acceptTos":
+                        acceptTos = Boolean.parseBoolean(value);
+                        break;
+                    case "outputFile":
+                        outputFile = value.equals("null") ? null : new File(value);
+                        break;
+                    case "proxyFile":
+                        proxyFile = value.equals("null") ? null : new File(value);
+                        break;
+                    case "debug":
+                        debug = Boolean.parseBoolean(value);
+                        break;
+                    case "threads":
+                        threads = value.equals("null") ? 5 : Integer.parseInt(value);
+                        break;
+                    case "delay":
+                        delay = value.equals("null") ? 500 : Integer.parseInt(value);
+                        break;
+                    case "rmFormatting":
+                        rmFormatting = Boolean.parseBoolean(value);
+                        break;
+                    case "useNullProxy":
+                        useNullProxy = Boolean.parseBoolean(value);
+                        break;
+                }
+
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void saveSettings(){
+
+        if(!settingsFile.exists()){
+            try {
+                settingsFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(settingsFile))) {
+            bw.write("plusMail:"+plusMail);
+            bw.newLine();
+            bw.write("userName:"+userName);
+            bw.newLine();
+            bw.write("password:"+password);
+            bw.newLine();
+            bw.write("startNum:"+startNum);
+            bw.newLine();
+            bw.write("count:"+count);
+            bw.newLine();
+            bw.write("captchaKey:"+captchaKey);
+            bw.newLine();
+            bw.write("autoVerify:"+autoVerify);
+            bw.newLine();
+            bw.write("avMail:"+avMail);
+            bw.newLine();
+            bw.write("avPass:"+avPass);
+            bw.newLine();
+            bw.write("acceptTos:"+acceptTos);
+            bw.newLine();
+            bw.write("outputFile:"+outputFile);
+            bw.newLine();
+            bw.write("proxyFile:"+proxyFile);
+            bw.newLine();
+            bw.write("debug:"+debug);
+            bw.newLine();
+            bw.write("threads:"+threads);
+            bw.newLine();
+            bw.write("delay:"+delay);
+            bw.newLine();
+            bw.write("rmFormatting:"+rmFormatting);
+            bw.newLine();
+            bw.write("useNullProxy:"+useNullProxy);
+            bw.newLine();
+            bw.flush();
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public static String millisToTime(long millis){
         return String.format("%02d min, %02d sec",
                 TimeUnit.MILLISECONDS.toMinutes(millis),
                 TimeUnit.MILLISECONDS.toSeconds(millis) -
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
         );
+    }
+
+    @Override
+    public void run() {
+        Start();
     }
 }
