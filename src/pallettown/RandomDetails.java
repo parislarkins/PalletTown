@@ -1,6 +1,8 @@
 package pallettown;
 
-import java.util.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Created by Paris on 23/01/2017.
@@ -28,17 +30,15 @@ public class RandomDetails {
     };
 
     static String randomBirthday() {
-        GregorianCalendar gc = new GregorianCalendar();
-
-        int year = randBetween(1900, 2000);
-
-        gc.set(Calendar.YEAR, year);
-
-        int dayOfYear = randBetween(1, gc.getActualMaximum(gc.DAY_OF_YEAR));
-
-        gc.set(Calendar.DAY_OF_YEAR, dayOfYear);
-
-        return (gc.get(Calendar.YEAR) + "-" + (gc.get(gc.MONTH) + 1) + "-" + gc.get(gc.DAY_OF_MONTH));
+        long minDay = LocalDate.of(1950, 1, 1).toEpochDay();
+        long maxDay = LocalDate.of(2002, 12, 31).toEpochDay();
+        long randomDay = ThreadLocalRandom.current().nextLong(minDay, maxDay);
+        LocalDate randomDate = LocalDate.ofEpochDay(randomDay);
+        
+        DateTimeFormatter yearlyFormat = DateTimeFormatter
+				.ofPattern("yyyy-MM-dd0");
+        
+        return randomDate.format(yearlyFormat);
     }
 
     static String randomUsername() {
