@@ -46,7 +46,7 @@ public class PalletTown implements Runnable {
 
         AccountCreator.success = 0;
 
-        if(!captchaKey.equals("")){
+        if(captchaKey != null && !captchaKey.equals("")){
             Platform.runLater(() -> {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("2Captcha Balance");
