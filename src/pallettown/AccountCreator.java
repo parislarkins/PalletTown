@@ -1,5 +1,6 @@
 package pallettown;
 
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import pallettown.GUI.AccountThread;
 
@@ -31,11 +32,26 @@ public class AccountCreator implements Runnable{
 
     static int success = 0;
 
-    private static ArrayList<PTCProxy> proxies = new ArrayList<>();
+    private static ArrayList<PTCProxy> proxies = null;
 
     public static boolean createAccounts(String user, String pass, String plus, String captcha) {
 
-        loadProxies();
+        //Dont reset proxies, should instead have a flag to see if proxies need to be reloaded (eg file changed, else leave it)
+        // If file needs to be changed, wipe and reload, else leave it
+
+        if(PalletTown.changedProxies || proxies == null) {
+            GUI.setStatus("Loading proxies...");
+
+            proxies = new ArrayList<>();
+            loadProxies();
+
+//            testProxies(proxies);
+//
+//            return false;
+//
+            PalletTown.changedProxies = false;
+        }
+
         //5 accounts per IP per 10 minutes
         username = user;
         password = pass;
@@ -44,8 +60,12 @@ public class AccountCreator implements Runnable{
 
         WORK_ITEMS = PalletTown.count;
 
+
+        GUI.setStatus("Starting account creation...");
+
         if(PalletTown.captchaKey.equals("")){
             Log("manual captcha");
+
             for (int i = 0; i < PalletTown.count; i++) {
                 PTCProxy proxy = getProxy();
                 createAccount(i, Thread.currentThread().getName(), proxy);
@@ -73,6 +93,7 @@ public class AccountCreator implements Runnable{
             }
         }
 
+        GUI.setStatus("Finished account creation...");
         Log("done");
 
         return true;
@@ -118,11 +139,8 @@ public class AccountCreator implements Runnable{
         }
 
 
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Waiting...");
-        alert.setHeaderText(null);
-        alert.setContentText("Waiting " + PalletTown.millisToTime(shortestWait.WaitTime()) + " until IP restriction is lifted");
-        alert.showAndWait();
+        PTCProxy finalShortestWait = shortestWait;
+        Platform.runLater(() -> GUI.showAlert(Alert.AlertType.INFORMATION,"Waiting...",null,"Waiting " + PalletTown.millisToTime(finalShortestWait.WaitTime()) + " until IP restriction is lifted"));
 
         Log("    no available proxies, waiting for next available proxy...");
         try {

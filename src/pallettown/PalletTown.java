@@ -1,9 +1,7 @@
 package pallettown;
 
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -39,6 +37,8 @@ public class PalletTown implements Runnable {
     public static boolean useNullProxy = true;
     private static File settingsFile = new File("pallettown.config");
 
+    public static boolean changedProxies = true;
+
     public static void Start(){
         parseArgs();
 
@@ -46,24 +46,26 @@ public class PalletTown implements Runnable {
 
         AccountCreator.success = 0;
 
-//        if(!captchaKey.equals("")){
-//            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-//            alert.setTitle("2Captcha Balance");
-//            alert.setHeaderText(null);
-//
-//            ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
-//            ButtonType no = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
-//
-//            alert.getButtonTypes().setAll(yes, no);
-//            alert.setContentText("Your 2Captcha balance is: " + checkBalance() + ".\n" +
-//                                  "This run will cost approximately: " + (double)Math.round((count * 0.0009) * 1000d) / 1000d +
-//                                  ".\nDo you wish to proceed?");
-//            alert.showAndWait().ifPresent(rs -> {
-//                if (rs == no) {
-//                    Log("cancel");
-//                }
-//            });
-//        }
+        if(!captchaKey.equals("")){
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("2Captcha Balance");
+                alert.setHeaderText(null);
+
+                ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+                ButtonType no = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+                alert.getButtonTypes().setAll(yes, no);
+                alert.setContentText("Your 2Captcha balance is: " + checkBalance() + ".\n" +
+                                      "This run will cost approximately: " + (double)Math.round((count * 0.0009) * 1000d) / 1000d +
+                                      ".\nDo you wish to proceed?");
+                alert.showAndWait().ifPresent(rs -> {
+                    if (rs == no) {
+                        Log("cancel");
+                    }
+                });
+            });
+        }
 
         String verify = verifySettings();
 
@@ -97,7 +99,7 @@ public class PalletTown implements Runnable {
             }
 
             Log("Verifying accounts...");
-            EmailVerifier.verify(avMail, avPass,AccountCreator.success);
+            EmailVerifier.verify(avMail, avPass,AccountCreator.success,5);
             Log("Done!");
         }
 
@@ -230,7 +232,7 @@ public class PalletTown implements Runnable {
 
         HBox delayBox = (HBox) advancedVb.getChildren().get(1);
         TextField delayNum = (TextField) threadbox.getChildren().get(1);
-        delay = delayNum.getText().equals("") ? 500 : Integer.parseInt(threadNum.getText());
+        delay = delayNum.getText().equals("") ? 500 : Integer.parseInt(delayNum.getText());
 
         CheckBox rocketMap = (CheckBox) advancedVb.getChildren().get(2);
         rmFormatting = rocketMap.isSelected();

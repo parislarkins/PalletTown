@@ -52,6 +52,7 @@ public class GUI extends Application{
 
     private static Calendar cal = Calendar.getInstance();
     static SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+    private static Label statusLabel;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -298,6 +299,7 @@ public class GUI extends Application{
                     "        log(threadname, \"unknown Error verifying age, terminating\")\n" +
                     "        driver.close()\n" +
                     "        driver.quit()\n" +
+                    "        raise e\n" +
                     "        return False\n" +
                     "\n" +
                     "    if driver.current_url != \"{}/sign-up/\".format(BASE_URL):\n" +
@@ -649,10 +651,13 @@ public class GUI extends Application{
                     new FileChooser.ExtensionFilter("Text File","*.txt")
             );
             fileChooser.setSelectedExtensionFilter(fileChooser.getExtensionFilters().get(1));
+
             pFile[0] = fileChooser.showOpenDialog(primaryStage);
             if (pFile[0] != null) {
                 proxyFileText.setText(pFile[0].getAbsolutePath());
             }
+
+            PalletTown.changedProxies = true;
         });
 
         Button advanced = new Button("Advanced Settings");
@@ -662,9 +667,12 @@ public class GUI extends Application{
         Button submit = new Button("Create accounts");
         submit.setOnAction(event -> {
 
-            if(!captchaKeyText.getText().isEmpty()){
+            if((captchaKeyText.getText() != null) && !captchaKeyText.getText().isEmpty()){
                 table.setVisible(true);
             }
+
+            accountThreads.clear();
+            table.refresh();
 
             PalletTown palletTown = new PalletTown();
 
@@ -673,6 +681,10 @@ public class GUI extends Application{
 //            PalletTown.Start();
         });
         mainVb.getChildren().add(submit);
+
+        statusLabel = new Label("Status: Waiting to start");
+
+        mainVb.getChildren().add(statusLabel);
 
         table = new TableView();
         table.setEditable(false);
@@ -790,6 +802,7 @@ public class GUI extends Application{
         textArea = new TextArea();
         textArea.setEditable(false);
         textArea.setPrefHeight(500);
+        textArea.setPrefWidth(600);
 
         Console console = new Console(textArea);
         PrintStream ps = new PrintStream(console,true);
@@ -797,6 +810,10 @@ public class GUI extends Application{
         System.setErr(ps);
 
         vb.getChildren().add(textArea);
+    }
+
+    public static void setStatus(String status){
+        Platform.runLater(() -> statusLabel.setText("Status: " + status));
     }
 
     synchronized

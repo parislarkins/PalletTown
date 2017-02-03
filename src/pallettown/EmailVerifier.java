@@ -29,7 +29,7 @@ public class EmailVerifier {
 
     private static final Flags deleted = new Flags(Flags.Flag.DELETED);
 
-    public static void verify(String email, String emailPass, int accounts) {
+    public static void verify(String email, String emailPass, int accounts, int retries) {
 
         String host;
 //        String port;
@@ -87,6 +87,7 @@ public class EmailVerifier {
             processMail(foundMessages);
 
             if(foundMessages.length < accounts){
+                //max 5 retries
                 Log("Not all verification emails received in time");
                 Log("Waiting another 3 minutes then trying again");
                 inbox.close(true);
@@ -94,7 +95,8 @@ public class EmailVerifier {
 
                 Thread.sleep(180000);
 
-                verify(email,emailPass,accounts - foundMessages.length);
+                if(retries > 0 )
+                    verify(email,emailPass,accounts - foundMessages.length, retries - 1);
             }
         } catch (NoSuchProviderException e) {
             e.printStackTrace();
