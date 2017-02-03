@@ -63,7 +63,7 @@ public class AccountCreator implements Runnable{
 
         GUI.setStatus("Starting account creation...");
 
-        if(PalletTown.captchaKey.equals("")){
+        if(PalletTown.captchaKey == null || PalletTown.captchaKey.equals("")){
             Log("manual captcha");
 
             for (int i = 0; i < PalletTown.count; i++) {
