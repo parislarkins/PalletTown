@@ -296,7 +296,7 @@ public class AccountCreator implements Runnable{
 
     private static boolean createAccPy(String username, String password, String email, String dob, String captchaKey, String name, String proxy, String authType){
         try{
-            if(captchaKey.isEmpty()) captchaKey = "null";
+            if(captchaKey == null || captchaKey.isEmpty()) captchaKey = "null";
 
             if(proxy.isEmpty()) proxy = "null";
 
