@@ -46,9 +46,9 @@ public class AccountCreator implements Runnable{
             loadProxies();
 
 //            testProxies(proxies);
-//
+
 //            return false;
-//
+
             PalletTown.changedProxies = false;
         }
 
