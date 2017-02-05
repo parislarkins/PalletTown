@@ -20,7 +20,7 @@ public class EmailVerifier {
 
     public static Folder trash;
 
-    private static final String GMAIL_HOST = "imap.avMail.com";
+    private static final String GMAIL_HOST = "imap.gmail.com";
 //    private static final String GMAIL_PORT = "993";
 
     private static final String HOTMAIL_HOST = "imap-mail.outlook.com";
@@ -34,13 +34,13 @@ public class EmailVerifier {
         String host;
 //        String port;
 
-        if(email.contains("@avMail.com")){
+        if(email.contains("@gmail.com")){
             host = GMAIL_HOST;
 //            port = "993";
         }else if (email.contains("@hotmail.com")){
             host = HOTMAIL_HOST;
         }else{
-            Log("invalid email, please use hotmail or avMail");
+            Log("invalid email, please use hotmail or gmail");
             return;
         }
 
@@ -184,5 +184,18 @@ public class EmailVerifier {
         }
 
         return "";
+    }
+
+    public static void delayedVerify(String avMail, String avPass, int success, int i, long wait) {
+
+        try {
+            System.out.println("Waiting " + PalletTown.millisToTime(wait) + " for emails to arrive");
+            Thread.sleep(wait);
+            System.out.println("Done waiting");
+            verify(avMail,avPass,success,i);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 }

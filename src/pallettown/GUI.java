@@ -57,7 +57,7 @@ public class GUI extends Application{
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
-        primaryStage.setTitle("PalletTown");
+        primaryStage.setTitle("PalletTown v"+VERSION);
         Scene scene = new Scene(mainRoot);
         primaryStage.setResizable(false);
 
@@ -238,6 +238,15 @@ public class GUI extends Application{
                     "    log(threadname,\" initializing..\")\n" +
                     "    log(threadname,\"Attempting to create user {user}:{pw}. Opening browser...\".format(user=username, pw=password))\n" +
                     "    \n" +
+                    "    proxyType = ''\n" +
+                    "\n" +
+                    "    if(proxyType.startswith('https')):\n" +
+                    "        proxyType = 'https'\n" +
+                    "    elif(proxyType.startswith('http')):\n" +
+                    "        proxyType = 'http'\n" +
+                    "    if(proxyType.startswith('socks5')):\n" +
+                    "        proxyType = 'socks5'\n" +
+                    "\n" +
                     "    if(captchakey2 == \"null\"):\n" +
                     "        captchakey2 = None\n" +
                     "    if(proxy == \"null\"):\n" +
@@ -252,13 +261,13 @@ public class GUI extends Application{
                     "        if proxy != None:\n" +
                     "            if(auth == 'IP'):\n" +
                     "                serv_args = [\n" +
-                    "                    '--proxy=https://' + proxy,\n" +
-                    "                    '--proxy-type=https',\n" +
+                    "                    '--proxy=' + proxy,\n" +
+                    "                    '--proxy-type=' + proxyType,\n" +
                     "                ]\n" +
                     "            else:\n" +
                     "                serv_args = [\n" +
-                    "                    '--proxy=https://' + proxy,\n" +
-                    "                    '--proxy-type=https',\n" +
+                    "                    '--proxy=' + proxy,\n" +
+                    "                    '--proxy-type=' + proxyType,\n" +
                     "                    '--proxy-auth=' + auth\n" +
                     "                ]\n" +
                     "            driver = webdriver.PhantomJS(desired_capabilities=dcap,service_args=serv_args)\n" +
@@ -478,7 +487,7 @@ public class GUI extends Application{
 
         Label userLabel = new Label("Username:");
 
-        final TextField userNameText = new TextField(userName == null ? "" : plusMail);
+        final TextField userNameText = new TextField(userName == null ? "" : userName);
         userNameText.setPromptText("Enter account username");
         userNameText.setPrefWidth(350);
         HBox user = new HBox();
@@ -505,7 +514,6 @@ public class GUI extends Application{
         final TextField numAccounts = new TextField(Integer.toString(count));
         numAccounts.setPrefWidth(350);
         numAccounts.setPromptText("Number of accounts to create.");
-        numAccounts.setText("1");
         HBox num = new HBox();
         num.setAlignment(Pos.CENTER_RIGHT);
         num.getChildren().addAll(numLabel,numAccounts);
@@ -787,9 +795,11 @@ public class GUI extends Application{
 
         vb.getChildren().add(del);
 
-        CheckBox rocketMap = new CheckBox("RocketMap output formatting");
-        rocketMap.setSelected(rmFormatting);
-        vb.getChildren().add(rocketMap);
+//        CheckBox outputFormat = new CheckBox("RocketMap output formatting");
+//        outputFormat.setSelected();
+        ComboBox<OutputFormat> outputFormatComboBox = new ComboBox<>(FXCollections.observableArrayList(OutputFormat.values()));
+        outputFormatComboBox.setValue(PalletTown.outputFormat);
+        vb.getChildren().add(outputFormatComboBox);
 
         CheckBox useMyIP = new CheckBox("Use my IP as well as proxies");
         useMyIP.setSelected(useNullProxy);

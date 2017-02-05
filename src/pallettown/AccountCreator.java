@@ -63,7 +63,7 @@ public class AccountCreator implements Runnable{
 
         GUI.setStatus("Starting account creation...");
 
-        if(PalletTown.captchaKey == null || PalletTown.captchaKey.equals("")){
+        if(PalletTown.captchaKey.equals("")){
             Log("manual captcha");
 
             for (int i = 0; i < PalletTown.count; i++) {
@@ -167,10 +167,15 @@ public class AccountCreator implements Runnable{
 
             while (in.hasNext()) {
                 String proxy = in.nextLine();
-                if(proxy.startsWith("http://")){
-                    proxy = proxy.substring(7);
-                }else if(proxy.startsWith("https://")){
-                    proxy = proxy.substring(8);
+//                if(proxy.startsWith("http://")){
+//                    proxy = proxy.substring(7);
+//                }else if(proxy.startsWith("https://")){
+//                    proxy = proxy.substring(8);
+//                }else if(proxy.startsWith("socks5://")){
+//                    proxy = proxy.substring()
+//                }
+                if(!proxy.startsWith("http") && !proxy.startsWith("socks5")){
+                    proxy = "https://"+proxy;
                 }
 
                 if(proxy.contains("@") && proxy.substring(0,proxy.indexOf("@")).contains(":")){
@@ -276,10 +281,16 @@ public class AccountCreator implements Runnable{
 
         incSuccess();
         if(PalletTown.outputFile != null)
-            if(PalletTown.rmFormatting) {
-            PalletTown.outputAppend("ptc," + accUser+","+accPw);
-            }else{
-                PalletTown.outputAppend(accUser+","+accPw);
+            switch(PalletTown.outputFormat){
+                case RocketMap:
+                    PalletTown.outputAppend("ptc," + accUser+","+accPw);
+                    break;
+                case PokeAlert:
+                    PalletTown.outputAppend(accUser + " " + password + " PTC None");
+                    break;
+                case Standard:
+                    PalletTown.outputAppend(accUser+","+accPw);
+                    break;
             }
 
         if(PalletTown.acceptTos)

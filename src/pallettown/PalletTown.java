@@ -18,6 +18,8 @@ import static pallettown.GUI.Log;
  */
 public class PalletTown implements Runnable {
 
+    public static final double VERSION = 1.4;
+
     public static String plusMail;
     public static String userName;
     public static String password;
@@ -33,7 +35,7 @@ public class PalletTown implements Runnable {
     public static boolean debug = false;
     public static int threads = 5;
     public static int delay = 500;
-    public static boolean rmFormatting = true;
+    public static OutputFormat outputFormat = OutputFormat.RocketMap;
     public static boolean useNullProxy = true;
     private static File settingsFile = new File("pallettown.config");
 
@@ -46,26 +48,28 @@ public class PalletTown implements Runnable {
 
         AccountCreator.success = 0;
 
-        if(captchaKey != null && !captchaKey.equals("")){
-            Platform.runLater(() -> {
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("2Captcha Balance");
-                alert.setHeaderText(null);
-
-                ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
-                ButtonType no = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-                alert.getButtonTypes().setAll(yes, no);
-                alert.setContentText("Your 2Captcha balance is: " + checkBalance() + ".\n" +
-                                      "This run will cost approximately: " + (double)Math.round((count * 0.0009) * 1000d) / 1000d +
-                                      ".\nDo you wish to proceed?");
-                alert.showAndWait().ifPresent(rs -> {
-                    if (rs == no) {
-                        Log("cancel");
-                    }
-                });
-            });
-        }
+        // Disabled as it doesn't work due to running on a seperate thread
+//        if(!captchaKey.equals("")){
+//            Platform.runLater(() -> {
+//                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+//                alert.setTitle("2Captcha Balance");
+//                alert.setHeaderText(null);
+//
+//                ButtonType yes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+//                ButtonType no = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+//
+//                alert.getButtonTypes().setAll(yes, no);
+//                alert.setContentText("Your 2Captcha balance is: " + checkBalance() + ".\n" +
+//                                      "This run will cost approximately: " + (double)Math.round((count * 0.0009) * 1000d) / 1000d +
+//                                      ".\nDo you wish to proceed?");
+//                alert.showAndWait().ifPresent(rs -> {
+//                    if (rs == no) {
+//                        Log("cancel");
+//                        return;
+//                    }
+//                });
+//            });
+//        }
 
         String verify = verifySettings();
 
@@ -90,21 +94,22 @@ public class PalletTown implements Runnable {
 
         if(autoVerify && !avMail.equals("") && !avPass.equals("")){
             Log("Account Creation done");
-            Log("Waiting 4 minutes for forwarded emails to arrive");
 
-            try {
-                Thread.sleep(24000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(24000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
 
             Log("Verifying accounts...");
-            EmailVerifier.verify(avMail, avPass,AccountCreator.success,5);
+            EmailVerifier.delayedVerify(avMail, avPass, AccountCreator.success,5, 240000);
+//            EmailVerifier.verify(avMail, avPass,AccountCreator.success,5);
             Log("Done!");
         }
 
     }
 
+    synchronized
     static void outputAppend(String s) {
         // append to end of file
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile,true))) {
@@ -231,11 +236,11 @@ public class PalletTown implements Runnable {
         threads = threadNum.getText().equals("") ? 5 : Integer.parseInt(threadNum.getText());
 
         HBox delayBox = (HBox) advancedVb.getChildren().get(1);
-        TextField delayNum = (TextField) threadbox.getChildren().get(1);
+        TextField delayNum = (TextField) delayBox.getChildren().get(1);
         delay = delayNum.getText().equals("") ? 500 : Integer.parseInt(delayNum.getText());
 
-        CheckBox rocketMap = (CheckBox) advancedVb.getChildren().get(2);
-        rmFormatting = rocketMap.isSelected();
+        ComboBox<OutputFormat> outputFormatBox = (ComboBox<OutputFormat>) advancedVb.getChildren().get(2);
+        outputFormat = outputFormatBox.getValue();
 
         CheckBox useMyIP = (CheckBox) advancedVb.getChildren().get(3);
         useNullProxy = useMyIP.isSelected();
@@ -245,6 +250,8 @@ public class PalletTown implements Runnable {
     }
 
     public static void loadSettings(){
+
+        boolean outdated = false;
 
         if(!settingsFile.exists()){
             System.out.println("no settings file exists");
@@ -260,33 +267,39 @@ public class PalletTown implements Runnable {
                 String argName = line.substring(0,line.indexOf(":"));
                 String value = line.substring(line.indexOf(":") + 1);
 
+                if(!outdated && argName.equals("version") && Double.valueOf(value) != VERSION){
+                    System.out.println("Config file version needs updating");
+
+                    outdated = true;
+                }
+
                 switch (argName){
                     case "plusMail":
-                        plusMail = value;
+                        plusMail = value.equals("null") ? "" : value;
                         break;
                     case "userName":
-                        userName = value.equals("null") ? null : value;
+                        userName = value.equals("null") ? "" : value;
                         break;
                     case "password":
-                        password = value.equals("null") ? null : value;
+                        password = value.equals("null") ? "" : value;
                         break;
                     case "startNum":
                         startNum = value.equals("null") ? null : Integer.parseInt(value);
                         break;
                     case "count":
-                        count = value.equals("null") ? null : Integer.parseInt(value);
+                        count = value.equals("null") ? 1 : Integer.parseInt(value);
                         break;
                     case "captchaKey":
-                        captchaKey = value.equals("null") ? null : value;
+                        captchaKey = value.equals("null") ? "" : value;
                         break;
                     case "autoVerify":
                         autoVerify = Boolean.parseBoolean(value);
                         break;
                     case "avMail":
-                        avMail = value.equals("null") ? null : value;
+                        avMail = value.equals("null") ? "" : value;
                         break;
                     case "avPass":
-                        avPass = value.equals("null") ? null : value;
+                        avPass = value.equals("null") ? "" : value;
                         break;
                     case "acceptTos":
                         acceptTos = Boolean.parseBoolean(value);
@@ -306,8 +319,8 @@ public class PalletTown implements Runnable {
                     case "delay":
                         delay = value.equals("null") ? 500 : Integer.parseInt(value);
                         break;
-                    case "rmFormatting":
-                        rmFormatting = Boolean.parseBoolean(value);
+                    case "outputFormat":
+                        outputFormat = OutputFormat.valueOf(value);
                         break;
                     case "useNullProxy":
                         useNullProxy = Boolean.parseBoolean(value);
@@ -320,6 +333,7 @@ public class PalletTown implements Runnable {
             e.printStackTrace();
         }
 
+        if(outdated) saveSettings();
     }
 
     public static void saveSettings(){
@@ -333,6 +347,8 @@ public class PalletTown implements Runnable {
         }
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(settingsFile))) {
+            bw.write("version:"+VERSION);
+            bw.newLine();
             bw.write("plusMail:"+plusMail);
             bw.newLine();
             bw.write("userName:"+userName);
@@ -363,7 +379,7 @@ public class PalletTown implements Runnable {
             bw.newLine();
             bw.write("delay:"+delay);
             bw.newLine();
-            bw.write("rmFormatting:"+rmFormatting);
+            bw.write("outputFormat:"+outputFormat);
             bw.newLine();
             bw.write("useNullProxy:"+useNullProxy);
             bw.newLine();
@@ -386,5 +402,11 @@ public class PalletTown implements Runnable {
     @Override
     public void run() {
         Start();
+    }
+
+    public static enum OutputFormat{
+        RocketMap,
+        PokeAlert,
+        Standard
     }
 }

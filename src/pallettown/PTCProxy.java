@@ -1,7 +1,6 @@
 package pallettown;
 
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Owner on 25/01/2017.
@@ -13,6 +12,7 @@ public class PTCProxy {
     public static final int MAX_USES = 5;
     public static final long RESET_TIME = 720000;
     private ArrayList<Long> startTimes = null;
+//    private Long latestTime = null;
     public String auth;
 
 
@@ -27,10 +27,14 @@ public class PTCProxy {
 //    }
 
     public void Use(){
+        long time = System.currentTimeMillis();
         if(startTimes == null){
             startTimes = new ArrayList<>();
         }
-        startTimes.add(System.currentTimeMillis());
+
+//        latestTime = time;
+
+        startTimes.add(time);
     }
 
     public void ReserveUse(){
@@ -42,22 +46,21 @@ public class PTCProxy {
         startTimes.remove(0);
         startTimes.forEach(aLong -> {
             long millis = startTimes.get(0) - System.currentTimeMillis();
-            String time = String.format("%02d min, %02d sec",
-                    TimeUnit.MILLISECONDS.toMinutes(millis),
-                    TimeUnit.MILLISECONDS.toSeconds(millis) -
-                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
-            );
+            String time = PalletTown.millisToTime(millis);
             System.out.println("    start time: " + time + " ago");
         });
     }
 
     public boolean Started(){
-        return startTimes != null;
+        return usages != 0;
     }
 
     public boolean Usable(){
         System.out.println("checking if proxy is usable");
+
+        if(usages < MAX_USES && startTimes == null) return true;
         long millis = System.currentTimeMillis() - startTimes.get(0);
+//        long millis = System.currentTimeMillis() - latestTime;
         String time = PalletTown.millisToTime(millis);
         System.out.println("proxy running time: " + time + ", usages: " + usages);
         return (millis < RESET_TIME && usages < MAX_USES);
@@ -73,6 +76,7 @@ public class PTCProxy {
 
     public long WaitTime() {
         return Math.max(RESET_TIME - (System.currentTimeMillis() - startTimes.get(0)),0);
+//        return Math.max(RESET_TIME - (System.currentTimeMillis() - latestTime), 0);
     }
 
     public void Reset() {
