@@ -95,15 +95,15 @@ public class PalletTown implements Runnable {
         if(autoVerify && !avMail.equals("") && !avPass.equals("")){
             Log("Account Creation done");
 
-//            try {
-//                Thread.sleep(24000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
+            Log("Waiting 4 minutes to verify emails");
+            try {
+                Thread.sleep(240000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-            Log("Verifying accounts...");
-            EmailVerifier.delayedVerify(avMail, avPass, AccountCreator.success,5, 240000);
-//            EmailVerifier.verify(avMail, avPass,AccountCreator.success,5);
+//            EmailVerifier.delayedVerify(avMail, avPass, AccountCreator.success,5);
+            EmailVerifier.verify(avMail, avPass,AccountCreator.success,5);
             Log("Done!");
         }
 
