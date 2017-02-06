@@ -686,9 +686,9 @@ public class GUI extends Application{
 
         table = new TableView();
         table.setEditable(false);
-        table.setMaxWidth(350);
+        table.setMaxWidth(500);
 
-        table.setMaxHeight(160);
+        table.setMaxHeight(200);
 
         TableColumn threadNameCol = new TableColumn("Thread");
         threadNameCol.setCellValueFactory(
