@@ -34,8 +34,8 @@ public class PalletTown implements Runnable {
     public static File proxyFile;
     public static boolean debug = false;
     public static int threads = 5;
-    public static int delay = 500;
-    public static int resetTime = 720000;
+    public static int delay = 5000;
+    public static int resetTime = 960000;
     public static OutputFormat outputFormat = OutputFormat.RocketMap;
     public static boolean useNullProxy = true;
     private static final File settingsFile = new File("pallettown.config");
