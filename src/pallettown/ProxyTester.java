@@ -1,77 +1,99 @@
 package pallettown;
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriverService;
-import org.openqa.selenium.remote.DesiredCapabilities;
+import org.apache.http.HttpHost;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.IOException;
 
 import static pallettown.GUI.Log;
 
 /**
  * Created by Owner on 3/02/2017.
  */
-public class ProxyTester {
+class ProxyTester {
 
-    public static WebDriver driver;
+    private static final String TEST_URL = "https://pgorelease.nianticlabs.com/plfe/rpc";
 
     public static void main(String[] args) {
+        testProxy("23.239.219.67:21260","IP");
     }
 
-    public static void testProxies(ArrayList<PTCProxy> proxies){
 
-        Logger shutUp = Logger.getLogger("");
-        shutUp.setLevel(Level.OFF);
+    public static boolean testProxy(String proxy, String auth) {
 
-        for (PTCProxy proxy : proxies) {
+        boolean valid = false;
 
+        int sepIndex = proxy.indexOf(":");
 
-            ArrayList<String> cliArgsCap = new ArrayList<String>();
-            cliArgsCap.add("--proxy=https://" + proxy.IP());
-            cliArgsCap.add("--proxy-type=https");
-            if(!proxy.auth.equals("IP"))
-                cliArgsCap.add("--proxy-auth=" + proxy.auth);
-            DesiredCapabilities capabilities = DesiredCapabilities.phantomjs();
+        String ip = proxy.substring(0,sepIndex);
+        int port = Integer.parseInt(proxy.substring(sepIndex+1));
 
-            capabilities.setCapability(PhantomJSDriverService.PHANTOMJS_CLI_ARGS,cliArgsCap);
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        try {
 
-            driver = new PhantomJSDriver(capabilities);
+            HttpHost proxyHost;
 
-
-
-            Log("Testing proxy: " + proxy.IP());
-
-            Log("Trying to connect to google.com");
-            driver.get("https://www.google.com");
-
-//            System.out.println(driver.getCurrentUrl());
-            if(driver.getCurrentUrl().contains("www.google.com"))
-                Log("Valid proxy, connected to www.google.com");
-            else {
-                Log("Could not connect to www.google.com, invalid proxy?");
-                driver.close();
-                driver.quit();
-                continue;
+            if(auth.equals("IP")){
+                proxyHost = new HttpHost(ip, port, "http");
+            }else{
+                proxyHost = new HttpHost(auth + "@" + ip,port,"http");
             }
 
-            Log("Trying to connect to PTC");
-            driver.get("https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up");
+            RequestConfig config = RequestConfig.custom()
+                    .setProxy(proxyHost)
+                    .build();
+            HttpPost request = new HttpPost(TEST_URL);
+            request.setConfig(config);
 
-//            System.out.println(driver.getCurrentUrl());
-            if(driver.getCurrentUrl().equals("about:blank"))
-                Log("Could not connect to PTC website, proxy banned?");
-            else
-                Log("Connected to PTC website!");
+            Log("Trying to connect to  " + TEST_URL + " via " + proxyHost);
 
-            Log(driver.getCurrentUrl());
+            String responseLine;
 
-            driver.close();
-            driver.quit();
+            try (CloseableHttpResponse response = httpclient.execute(request)) {
+//                System.out.println("----------------------------------------");
+                responseLine = response.getStatusLine().toString();
+//                System.out.println(responseLine);
+                EntityUtils.consume(response.getEntity());
+            } catch (HttpHostConnectException e){
+                Log("Failed to establish proxy connection");
+                return false;
+            }
+
+            int startIndex = responseLine.indexOf(" ") + 1;
+            int endIndex = responseLine.lastIndexOf(" ");
+
+            int responseCode = Integer.parseInt(responseLine.substring(startIndex,endIndex));
+
+            switch(responseCode){
+                case 200:
+                    Log("Proxy " + proxy + " ok!");
+                    valid = true;
+                    break;
+                case 403:
+                    Log("Proxy " + proxy + " is banned, status code: " + responseLine);
+                    break;
+                default:
+                    Log("Proxy " + proxy + " gave unexpected response, status code: " + responseLine);
+                    break;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                httpclient.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
+        return valid;
     }
 
 }

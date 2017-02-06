@@ -1,7 +1,6 @@
 package pallettown;
 
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
 import pallettown.GUI.AccountThread;
 
 import java.io.FileNotFoundException;
@@ -11,30 +10,31 @@ import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 import static pallettown.GUI.Log;
+import static pallettown.GUI.setStatus;
 
 /**
  * Created by Paris on 20/01/2017.
  */
-public class AccountCreator implements Runnable{
+class AccountCreator implements Runnable{
 
-    static final String BASE_URL = "https://club.pokemon.com/us/pokemon-trainer-club";
-    private static final long CAPTCHA_TIMEOUT = 6000;
-    private static final int THREADS = 5;
+    // --Commented out by Inspection (6/02/2017 10:54 AM):static final String BASE_URL = "https://club.pokemon.com/us/pokemon-trainer-club";
+    // --Commented out by Inspection (6/02/2017 10:54 AM):private static final long CAPTCHA_TIMEOUT = 6000;
+    // --Commented out by Inspection (6/02/2017 10:54 AM):private static final int THREADS = 5;
 
     private static String username;
     private static String password;
     private static String plusMail;
     private static String captchaKey = "";
 
-    public static int WORK_ITEMS;
+    private static int WORK_ITEMS;
 
-    int accNum = 0;
+    private int accNum = 0;
 
     static int success = 0;
 
     private static ArrayList<PTCProxy> proxies = null;
 
-    public static boolean createAccounts(String user, String pass, String plus, String captcha) {
+    public static void createAccounts(String user, String pass, String plus, String captcha) {
 
         //Dont reset proxies, should instead have a flag to see if proxies need to be reloaded (eg file changed, else leave it)
         // If file needs to be changed, wipe and reload, else leave it
@@ -45,7 +45,7 @@ public class AccountCreator implements Runnable{
             proxies = new ArrayList<>();
             loadProxies();
 
-//            testProxies(proxies);
+//            seleniumTestProxies(proxies);
 
 //            return false;
 
@@ -87,7 +87,7 @@ public class AccountCreator implements Runnable{
             Log(Thread.currentThread().getName()+ " is twiddling its thumbs");
             try {
                 for (int i = 0; i < PalletTown.threads; i++)
-                    threads[i].join(360000);
+                    threads[i].join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -96,7 +96,6 @@ public class AccountCreator implements Runnable{
         GUI.setStatus("Finished account creation...");
         Log("done");
 
-        return true;
     }
 
     synchronized
@@ -113,7 +112,7 @@ public class AccountCreator implements Runnable{
                 shortestWait = proxy;
             }
 
-            if(!proxy.Started()){
+            if(proxy.NotStarted()){
                 Log("    proxy unstarted, using..");
                 proxy.ReserveUse();
                 return proxy;
@@ -140,12 +139,18 @@ public class AccountCreator implements Runnable{
 
 
         PTCProxy finalShortestWait = shortestWait;
-        Platform.runLater(() -> GUI.showAlert(Alert.AlertType.INFORMATION,"Waiting...",null,"Waiting " + PalletTown.millisToTime(finalShortestWait.WaitTime()) + " until IP restriction is lifted"));
+        Platform.runLater(() -> {
+            assert finalShortestWait != null;
+            setStatus("Waiting for next available proxy...");
+//            GUI.showAlert(Alert.AlertType.INFORMATION, "Waiting...", null, "Waiting " + PalletTown.millisToTime(finalShortestWait.WaitTime()) + " until IP restriction is lifted");
+        });
 
         Log("    no available proxies, waiting for next available proxy...");
         try {
+            assert shortestWait != null;
             Log("    shortest wait time: " + PalletTown.millisToTime(shortestWait.WaitTime()));
-            Thread.sleep(shortestWait.WaitTime());
+            Thread.currentThread().sleep(shortestWait.WaitTime());
+            setStatus("Proxy available..");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -167,23 +172,26 @@ public class AccountCreator implements Runnable{
 
             while (in.hasNext()) {
                 String proxy = in.nextLine();
-//                if(proxy.startsWith("http://")){
-//                    proxy = proxy.substring(7);
-//                }else if(proxy.startsWith("https://")){
-//                    proxy = proxy.substring(8);
-//                }else if(proxy.startsWith("socks5://")){
-//                    proxy = proxy.substring()
-//                }
+
                 if(!proxy.startsWith("http") && !proxy.startsWith("socks5")){
                     proxy = "https://"+proxy;
                 }
 
+
+                String proxyIP = proxy.substring(proxy.indexOf("://") + 3);
+                String proxyAuth = "IP";
+
                 if(proxy.contains("@") && proxy.substring(0,proxy.indexOf("@")).contains(":")){
-                    String proxyIP = proxy.substring(proxy.indexOf("@") + 1);
-                    String proxyAuth = proxy.substring(0,proxy.indexOf("@"));
+                    proxyIP = proxy.substring(proxy.indexOf("@") + 1);
+                    proxyAuth = proxy.substring(0,proxy.indexOf("@"));
                     proxies.add(new PTCProxy(proxyIP, proxyAuth));
                 }else{
-                    proxies.add(new PTCProxy(proxy,"IP"));
+                    if(ProxyTester.testProxy(proxyIP,proxyAuth)) {
+                        Log("Adding " + proxy + " to list");
+                        proxies.add(new PTCProxy(proxy, proxyAuth));
+                    }
+                    else
+                        Log(proxy + " failed test, not adding");
                 }
             }
 
@@ -330,7 +338,7 @@ public class AccountCreator implements Runnable{
 
             Process p = pb.start();
 
-            if(!p.waitFor(6, TimeUnit.MINUTES)){
+            if(!p.waitFor(4, TimeUnit.MINUTES)){
                 Log(Thread.currentThread().getName() + " python process timed out, terminating...");
                 p.destroy();
                 Thread.sleep(1000);

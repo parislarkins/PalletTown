@@ -34,24 +34,18 @@ import static pallettown.PalletTown.*;
  */
 public class GUI extends Application{
 
-    private static final int VIEWER_WIDTH = 500;
-    private static final int VIEWER_HEIGHT = 500;
+    private static final ObservableList<AccountThread> accountThreads = FXCollections.observableArrayList();
 
-    public static ObservableList<AccountThread> accountThreads = FXCollections.observableArrayList();
-
-    private Group mainRoot = new Group();
-    static Group controls = new Group();
+    private final Group mainRoot = new Group();
+    static final Group controls = new Group();
     private Stage primaryStage;
     
-    static Group advancedRoot = new Group();
-    static Group advancedControls = new Group();
+    static final Group advancedRoot = new Group();
     private Stage advancedStage = null;
     private Scene advancedScene;
-    public static TextArea textArea;
     private static TableView table;
 
-    private static Calendar cal = Calendar.getInstance();
-    static SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
     private static Label statusLabel;
 
     @Override
@@ -114,10 +108,10 @@ public class GUI extends Application{
                     "\n" +
                     "# endpoints taken from PTCAccount\n" +
                     "SUCCESS_URLS = (\n" +
-                    "    'https://club.pokemon.com/us/pokemon-trainer-club/parents/email',\n" +
+                    "    'https://club.pokemon.com/us/pokemon-trainer-club/parents/email'\n" +
                     "    # This initially seemed to be the proper success redirect\n" +
-                    "    'https://club.pokemon.com/us/pokemon-trainer-club/sign-up/',\n" +
-                    "    'https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up'\n" +
+                    "    #'https://club.pokemon.com/us/pokemon-trainer-club/sign-up/',\n" +
+                    "    #'https://club.pokemon.com/us/pokemon-trainer-club/parents/sign-up'\n" +
                     "    # but experimentally it now seems to return to the sign-up, but still registers\n" +
                     ")\n" +
                     "\n" +
@@ -452,7 +446,7 @@ public class GUI extends Application{
                     "    log(threadname,\"Account \" + username + \":\" + password + \" successfully created.\\n \\n\")\n" +
                     "    return True\n" +
                     "\n" +
-                    "create_account(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],sys.argv[7],sys.argv[8],180)";
+                    "create_account(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6],sys.argv[7],sys.argv[8],300)";
 
             BufferedWriter out = new BufferedWriter(new FileWriter("accountcreate.py"));
             out.write(prg);
@@ -607,9 +601,7 @@ public class GUI extends Application{
         outputFileText.setPrefWidth(350);
 
         Button clearOutput = new Button("Clear");
-        clearOutput.setOnAction(event -> {
-            outputFileText.clear();
-        });
+        clearOutput.setOnAction(event -> outputFileText.clear());
 
         HBox output = new HBox();
         output.setAlignment(Pos.CENTER_RIGHT);
@@ -639,9 +631,7 @@ public class GUI extends Application{
         proxyFileText.setPrefWidth(350);
 
         Button clearProxy = new Button("Clear");
-        clearProxy.setOnAction(event -> {
-            proxyFileText.clear();
-        });
+        clearProxy.setOnAction(event -> proxyFileText.clear());
 
         HBox proxy = new HBox();
         proxy.setAlignment(Pos.CENTER_RIGHT);
@@ -795,6 +785,18 @@ public class GUI extends Application{
 
         vb.getChildren().add(del);
 
+        Label resetLabel = new Label("Proxy reset time (ms):");
+
+        final TextField resetText = new TextField(Integer.toString(resetTime));
+        resetText.setPrefWidth(80);
+
+        HBox reset = new HBox();
+        reset.setAlignment(Pos.CENTER_RIGHT);
+        reset.getChildren().addAll(resetLabel,resetText);
+        reset.setSpacing(10);
+
+        vb.getChildren().add(reset);
+
 //        CheckBox outputFormat = new CheckBox("RocketMap output formatting");
 //        outputFormat.setSelected();
         ComboBox<OutputFormat> outputFormatComboBox = new ComboBox<>(FXCollections.observableArrayList(OutputFormat.values()));
@@ -809,7 +811,7 @@ public class GUI extends Application{
         debugBox.setSelected(debug);
         vb.getChildren().add(debugBox);
 
-        textArea = new TextArea();
+        TextArea textArea = new TextArea();
         textArea.setEditable(false);
         textArea.setPrefHeight(500);
         textArea.setPrefWidth(600);
@@ -839,8 +841,8 @@ public class GUI extends Application{
         alert.show();
     }
 
-    public static String currentTime(){
-        cal = Calendar.getInstance();
+    private static String currentTime(){
+        Calendar cal = Calendar.getInstance();
         return sdf.format(cal.getTime());
     }
 
@@ -851,7 +853,7 @@ public class GUI extends Application{
 
     public static class Console extends OutputStream {
 
-        private TextArea output;
+        private final TextArea output;
 
         public Console(TextArea ta) {
             this.output = ta;
@@ -868,8 +870,8 @@ public class GUI extends Application{
         private final SimpleStringProperty threadName;
         private SimpleStringProperty latestTime;
         private SimpleStringProperty latestMessage;
-        private SimpleIntegerProperty successes = new SimpleIntegerProperty(0);
-        private SimpleIntegerProperty failures = new SimpleIntegerProperty(0);
+        private final SimpleIntegerProperty successes = new SimpleIntegerProperty(0);
+        private final SimpleIntegerProperty failures = new SimpleIntegerProperty(0);
         private final ArrayList<Pair<String, String>> messages = new ArrayList<>();
 
         public AccountThread(String name){

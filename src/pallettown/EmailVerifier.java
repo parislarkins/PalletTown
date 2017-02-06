@@ -2,7 +2,6 @@ package pallettown;
 
 import javax.mail.*;
 import javax.mail.search.SearchTerm;
-import java.io.IOException;
 import java.util.Properties;
 
 import static pallettown.GUI.Log;
@@ -11,20 +10,17 @@ import static pallettown.GUI.Log;
  * Created by Paris on 20/01/2017.
  */
 
-public class EmailVerifier {
+class EmailVerifier {
 
-    static Properties mailServerProperties = new Properties();
-    static Session getMailSession;
+    private static final Properties mailServerProperties = new Properties();
 
-    public static Store store;
-
-    public static Folder trash;
+    private static Folder trash;
 
     private static final String GMAIL_HOST = "imap.gmail.com";
 //    private static final String GMAIL_PORT = "993";
 
     private static final String HOTMAIL_HOST = "imap-mail.outlook.com";
-//    private static final String HOTMAIL_PORT = ""
+    //    private static final String HOTMAIL_PORT = ""
     private static Folder inbox;
 
     private static final Flags deleted = new Flags(Flags.Flag.DELETED);
@@ -34,12 +30,12 @@ public class EmailVerifier {
         String host;
 //        String port;
 
-        if(email.contains("@gmail.com")){
+        if (email.contains("@gmail.com")) {
             host = GMAIL_HOST;
 //            port = "993";
-        }else if (email.contains("@hotmail.com")){
+        } else if (email.contains("@hotmail.")) {
             host = HOTMAIL_HOST;
-        }else{
+        } else {
             Log("invalid email, please use hotmail or gmail");
             return;
         }
@@ -47,17 +43,17 @@ public class EmailVerifier {
         mailServerProperties.put("mail.imap.host", host);
         mailServerProperties.put("mail.imap.port", "993");
         mailServerProperties.put("mail.imap.starttls.enable", "true");
-        getMailSession = Session.getDefaultInstance(mailServerProperties, null);
+        Session getMailSession = Session.getDefaultInstance(mailServerProperties, null);
 
         try {
-            store = getMailSession.getStore("imaps");
+            Store store = getMailSession.getStore("imaps");
             store.connect(host, email, emailPass);
 
             // opens the inbox folder
             inbox = store.getFolder("INBOX");
             inbox.open(Folder.READ_WRITE);
 
-            if(host.equals(GMAIL_HOST))
+            if (host.equals(GMAIL_HOST))
                 trash = store.getFolder("[Gmail]/Trash");
             else
                 trash = store.getFolder("Deleted");
@@ -86,7 +82,7 @@ public class EmailVerifier {
 
             processMail(foundMessages);
 
-            if(foundMessages.length < accounts){
+            if (foundMessages.length < accounts) {
                 //max 5 retries
                 Log("Not all verification emails received in time");
                 Log("Waiting another 3 minutes then trying again");
@@ -95,14 +91,10 @@ public class EmailVerifier {
 
                 Thread.sleep(180000);
 
-                if(retries > 0 )
-                    verify(email,emailPass,accounts - foundMessages.length, retries - 1);
+                if (retries > 0)
+                    verify(email, emailPass, accounts - foundMessages.length, retries - 1);
             }
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (MessagingException | InterruptedException e) {
             e.printStackTrace();
         }
 
@@ -110,10 +102,10 @@ public class EmailVerifier {
     }
 
     private static void processMail(Message[] foundMessages) {
-        Log("Processing " +foundMessages.length + " emails");
+        Log("Processing " + foundMessages.length + " emails");
 
 
-        if(foundMessages.length == 0){
+        if (foundMessages.length == 0) {
             Log("no emails found");
             return;
         }
@@ -126,36 +118,32 @@ public class EmailVerifier {
 
                 int validkey_index = content.indexOf("https://club.pokemon.com/us/pokemon-trainer-club/activated/");
 
-                if(validkey_index != -1){
-                    String validlink = content.substring(validkey_index,validkey_index+93);
-                    validlink = validlink.replace("\r","");
-                    validlink = validlink.replace("\n","");
-                    validlink = validlink.replace(">","");
-                    validlink = validlink.replace("=","");
+                if (validkey_index != -1) {
+                    String validlink = content.substring(validkey_index, validkey_index + 93);
+                    validlink = validlink.replace("\r", "");
+                    validlink = validlink.replace("\n", "");
+                    validlink = validlink.replace(">", "");
+                    validlink = validlink.replace("=", "");
 
                     Log(validlink);
                     String validate_response = "Failed";
 
-                    while(validate_response.equals("Failed")){
-                        validate_response = UrlUtil.openUrl(validlink, true);
+                    while (validate_response.equals("Failed")) {
+                        validate_response = UrlUtil.openUrl(validlink);
                     }
 
                     Log(validate_response);
 
                     Log("Verified email and trashing, validate key: " + validlink.substring(60) + "\n");
 
-                    Message[] messageArr = new Message[] {message};
+                    Message[] messageArr = new Message[]{message};
 
-                    inbox.copyMessages(messageArr,trash);
+                    inbox.copyMessages(messageArr, trash);
 
-                    inbox.setFlags(messageArr,deleted,true);
+                    inbox.setFlags(messageArr, deleted, true);
 
                 }
 
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -169,11 +157,11 @@ public class EmailVerifier {
 * based on which, it processes and
 * fetches the content of the message
 */
-    public static String getMailText(Part p) throws Exception {
+    private static String getMailText(Part p) throws Exception {
 
         //check if the content is plain text
         if (p.isMimeType("text/plain")) {
-            return((String) p.getContent());
+            return ((String) p.getContent());
         }
         //check if the content has attachment
         else if (p.isMimeType("multipart/*")) {
@@ -186,16 +174,4 @@ public class EmailVerifier {
         return "";
     }
 
-    public static void delayedVerify(String avMail, String avPass, int success, int i, long wait) {
-
-        try {
-            System.out.println("Waiting " + PalletTown.millisToTime(wait) + " for emails to arrive");
-            Thread.sleep(wait);
-            System.out.println("Done waiting");
-            verify(avMail,avPass,success,i);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-    }
 }

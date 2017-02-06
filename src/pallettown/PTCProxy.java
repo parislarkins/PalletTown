@@ -5,15 +5,15 @@ import java.util.ArrayList;
 /**
  * Created by Owner on 25/01/2017.
  */
-public class PTCProxy {
+class PTCProxy {
 
-    private String ip;
+    private final String ip;
     private int usages = 0;
-    public static final int MAX_USES = 5;
-    public static final long RESET_TIME = 720000;
+    private static final int MAX_USES = 5;
+    private static final long RESET_TIME = PalletTown.resetTime;
     private ArrayList<Long> startTimes = null;
 //    private Long latestTime = null;
-    public String auth;
+    public final String auth;
 
 
     PTCProxy(String ip, String auth){
@@ -51,8 +51,8 @@ public class PTCProxy {
         });
     }
 
-    public boolean Started(){
-        return usages != 0;
+    public boolean NotStarted(){
+        return usages == 0;
     }
 
     public boolean Usable(){
@@ -70,17 +70,9 @@ public class PTCProxy {
         return ip;
     }
 
-    public int Usages(){
-        return usages;
-    }
-
     public long WaitTime() {
         return Math.max(RESET_TIME - (System.currentTimeMillis() - startTimes.get(0)),0);
 //        return Math.max(RESET_TIME - (System.currentTimeMillis() - latestTime), 0);
     }
 
-    public void Reset() {
-        startTimes = null;
-        usages = 0;
-    }
 }

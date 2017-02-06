@@ -10,9 +10,9 @@ import java.net.URLConnection;
 /**
  * Created by Paris on 20/01/2017.
  */
-public class UrlUtil {
+class UrlUtil {
 
-    public static String openUrl(String address, boolean checkResponse) {
+    public static String openUrl(String address) {
         String response = "";
         URL url;
         try {
@@ -20,19 +20,12 @@ public class UrlUtil {
             try {
                 URLConnection conn = url.openConnection();
 
-                if(!checkResponse)
-                    return "";
-
                 BufferedReader br = new BufferedReader(
                         new InputStreamReader(conn.getInputStream()));
 
                 response = br.readLine();
 //                System.out.println(response);
-                String inputLine;
-                while ((inputLine = br.readLine()) != null) {
-//                    if (PalletTown.debug)
-//                        System.out.println(inputLine);
-                }
+
                 br.close();
 
             } catch (IOException e) {

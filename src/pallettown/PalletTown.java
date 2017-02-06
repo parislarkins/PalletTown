@@ -18,7 +18,7 @@ import static pallettown.GUI.Log;
  */
 public class PalletTown implements Runnable {
 
-    public static final double VERSION = 1.4;
+    public static final double VERSION = 1.45;
 
     public static String plusMail;
     public static String userName;
@@ -35,13 +35,14 @@ public class PalletTown implements Runnable {
     public static boolean debug = false;
     public static int threads = 5;
     public static int delay = 500;
+    public static int resetTime = 720000;
     public static OutputFormat outputFormat = OutputFormat.RocketMap;
     public static boolean useNullProxy = true;
-    private static File settingsFile = new File("pallettown.config");
+    private static final File settingsFile = new File("pallettown.config");
 
     public static boolean changedProxies = true;
 
-    public static void Start(){
+    private static void Start(){
         parseArgs();
 
         saveSettings();
@@ -79,9 +80,9 @@ public class PalletTown implements Runnable {
             return;
         }
 
-        if(autoVerify && outputFile != null){
+//        if(autoVerify && outputFile != null){
 //            outputAppend("\nThe following accounts use the email address: " + plusMail + "\n");
-        }
+//        }
 
         Log("Starting");
 
@@ -123,7 +124,7 @@ public class PalletTown implements Runnable {
         }
     }
 
-    static boolean newLineExists(File file) throws IOException {
+    private static boolean newLineExists(File file) throws IOException {
         RandomAccessFile fileHandler = new RandomAccessFile(file, "r");
         long fileLength = fileHandler.length() - 1;
         if (fileLength < 0) {
@@ -134,10 +135,7 @@ public class PalletTown implements Runnable {
         byte readByte = fileHandler.readByte();
         fileHandler.close();
 
-        if (readByte == 0xA || readByte == 0xD) {
-            return true;
-        }
-        return false;
+        return readByte == 0xA || readByte == 0xD;
     }
 
     private static String verifySettings() {
@@ -157,13 +155,13 @@ public class PalletTown implements Runnable {
         if((startNum == null || startNum == 0) && count > 1 && userName != null)
             return "To create more than 1 account, specify a start number";
 
-        if(autoVerify && (avMail.equals("") || avPass.equals("") || (!avMail.contains("@gmail.com") && !avMail.contains("@hotmail.com"))))
+        if(autoVerify && (avMail.equals("") || avPass.equals("") || (!avMail.contains("@gmail.com") && !avMail.contains("@hotmail."))))
             return "Check auto verify account/password are correct (Use hotmail or gmail)";
 
         return "valid";
     }
 
-    public static boolean validatePass(String password) {
+    private static boolean validatePass(String password) {
         Pattern pattern = Pattern.compile("^(?=.*?[A-Z])(?=(.*[a-z]){1,})(?=(.*[\\d]){1,})(?=(.*[\\W]){1,})(?!.*\\s).{8,}$");
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();
@@ -174,7 +172,7 @@ public class PalletTown implements Runnable {
         String balance = "Failed";
 
         while (balance.equals("Failed")){
-            balance = UrlUtil.openUrl("http://2captcha.com/res.php?key=" + captchaKey + "&action=getbalance", true);
+            balance = UrlUtil.openUrl("http://2captcha.com/res.php?key=" + captchaKey + "&action=getbalance");
         }
 
         return Float.valueOf(balance);
@@ -239,13 +237,17 @@ public class PalletTown implements Runnable {
         TextField delayNum = (TextField) delayBox.getChildren().get(1);
         delay = delayNum.getText().equals("") ? 500 : Integer.parseInt(delayNum.getText());
 
-        ComboBox<OutputFormat> outputFormatBox = (ComboBox<OutputFormat>) advancedVb.getChildren().get(2);
+        HBox resetBox = (HBox) advancedVb.getChildren().get(2);
+        TextField resetNum = (TextField) resetBox.getChildren().get(1);
+        resetTime = resetNum.getText().equals("") ? 72000 : Integer.parseInt(resetNum.getText());
+
+        ComboBox<OutputFormat> outputFormatBox = (ComboBox<OutputFormat>) advancedVb.getChildren().get(3);
         outputFormat = outputFormatBox.getValue();
 
-        CheckBox useMyIP = (CheckBox) advancedVb.getChildren().get(3);
+        CheckBox useMyIP = (CheckBox) advancedVb.getChildren().get(4);
         useNullProxy = useMyIP.isSelected();
 
-        CheckBox debugMode = (CheckBox) advancedVb.getChildren().get(4);
+        CheckBox debugMode = (CheckBox) advancedVb.getChildren().get(5);
         debug = debugMode.isSelected();
     }
 
@@ -268,7 +270,7 @@ public class PalletTown implements Runnable {
                 String value = line.substring(line.indexOf(":") + 1);
 
                 if(!outdated && argName.equals("version") && Double.valueOf(value) != VERSION){
-                    System.out.println("Config file version needs updating");
+                    Log("Config file out of date, updating");
 
                     outdated = true;
                 }
@@ -319,6 +321,9 @@ public class PalletTown implements Runnable {
                     case "delay":
                         delay = value.equals("null") ? 500 : Integer.parseInt(value);
                         break;
+                    case "resetTime":
+                        resetTime = value.equals("null") ? 78000 : Integer.parseInt(value);
+                        break;
                     case "outputFormat":
                         outputFormat = OutputFormat.valueOf(value);
                         break;
@@ -336,7 +341,7 @@ public class PalletTown implements Runnable {
         if(outdated) saveSettings();
     }
 
-    public static void saveSettings(){
+    private static void saveSettings(){
 
         if(!settingsFile.exists()){
             try {
@@ -379,6 +384,8 @@ public class PalletTown implements Runnable {
             bw.newLine();
             bw.write("delay:"+delay);
             bw.newLine();
+            bw.write("resetTime:"+resetTime);
+            bw.newLine();
             bw.write("outputFormat:"+outputFormat);
             bw.newLine();
             bw.write("useNullProxy:"+useNullProxy);
@@ -404,7 +411,7 @@ public class PalletTown implements Runnable {
         Start();
     }
 
-    public static enum OutputFormat{
+    public enum OutputFormat{
         RocketMap,
         PokeAlert,
         Standard
