@@ -1,6 +1,7 @@
-package pallettown;
+package test.pallettown;
 
 import org.junit.Test;
+import pallettown.PTCProxy;
 
 /**
  * Created by Owner on 28/01/2017.
@@ -90,7 +91,7 @@ public class ProxyTest implements Runnable {
                 shortestWait = proxy;
             }
 
-            if(!proxy.Started()){
+            if(proxy.NotStarted()){
                 System.out.println("    proxy unstarted, using..");
 //                proxy.StartUsing();
                 return proxy.IP();
