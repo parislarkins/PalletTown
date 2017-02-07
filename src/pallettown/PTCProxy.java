@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * Created by Owner on 25/01/2017.
  */
-class PTCProxy {
+public class PTCProxy {
 
     private final String ip;
     private int usages = 0;
@@ -16,7 +16,7 @@ class PTCProxy {
     public final String auth;
 
 
-    PTCProxy(String ip, String auth){
+    public PTCProxy(String ip, String auth){
         this.ip = ip;
         this.auth = auth;
     }

@@ -65,22 +65,16 @@ class ProxyTester {
                 return false;
             }
 
-            int startIndex = responseLine.indexOf(" ") + 1;
-            int endIndex = responseLine.lastIndexOf(" ");
 
-            int responseCode = Integer.parseInt(responseLine.substring(startIndex,endIndex));
+            String respCode = responseLine.substring(9);
 
-            switch(responseCode){
-                case 200:
-                    Log("Proxy " + proxy + " ok!");
-                    valid = true;
-                    break;
-                case 403:
-                    Log("Proxy " + proxy + " is banned, status code: " + responseLine);
-                    break;
-                default:
-                    Log("Proxy " + proxy + " gave unexpected response, status code: " + responseLine);
-                    break;
+            if(respCode.contains("200 ")){
+                Log("Proxy " + proxy + " ok!");
+                valid = true;
+            }else if(respCode.contains("403 ")){
+                Log("Proxy " + proxy + " is banned, status code: " + respCode);
+            }else{
+                Log("Proxy " + proxy + " gave unexpected response, status code: " + respCode);
             }
 
         } catch (IOException e) {

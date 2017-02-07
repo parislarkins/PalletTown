@@ -8,7 +8,7 @@ import pallettown.PTCProxy;
  */
 public class ProxyTest implements Runnable {
 
-    private static String[] ips = new String[] {
+    private static final String[] ips = new String[] {
             "23.239.219.67:21260",
             "104.224.39.45:21279" ,
             "138.128.66.121:21260" ,
@@ -16,13 +16,13 @@ public class ProxyTest implements Runnable {
             "45.57.195.248:21235"
     };
 
-    public static final int THREADS = 1;
+    private static final int THREADS = 1;
     private static final int WORK_ITEMS = 30;
 
 
-    static PTCProxy[] proxies = new PTCProxy[ips.length];
+    private static final PTCProxy[] proxies = new PTCProxy[ips.length];
 
-    int accNum = 0;
+    private int accNum = 0;
 
     @Test
     public void TestProxies(){
@@ -118,6 +118,7 @@ public class ProxyTest implements Runnable {
 
         System.out.println("    no available proxies, waiting for next available proxy...");
         try {
+            assert shortestWait != null;
             System.out.println("    shortest wait time: " + shortestWait.WaitTime());
             Thread.sleep(shortestWait.WaitTime());
         } catch (InterruptedException e) {
