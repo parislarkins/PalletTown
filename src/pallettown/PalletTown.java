@@ -18,7 +18,7 @@ import static pallettown.GUI.Log;
  */
 public class PalletTown implements Runnable {
 
-    public static final double VERSION = 1.5;
+    public static final double VERSION = 1.47;
 
     public static String plusMail;
     public static String userName;
