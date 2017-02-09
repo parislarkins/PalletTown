@@ -275,7 +275,12 @@ class AccountCreator implements Runnable{
             accPw = password;
         }
 
-        String accMail = plusMail.replace("@","+" + accUser + "@");
+        String accMail;
+
+        if(!PalletTown.privateDomain)
+            accMail = plusMail.replace("@","+" + accUser + "@");
+        else
+            accMail = plusMail.replace("@",accUser + "@");
 
         Log("  Username: " + accUser);
         Log("  Password: " + accPw);
@@ -295,7 +300,7 @@ class AccountCreator implements Runnable{
                     PalletTown.outputAppend("ptc," + accUser+","+accPw);
                     break;
                 case PokeAlert:
-                    PalletTown.outputAppend(accUser + " " + password + " PTC None");
+                    PalletTown.outputAppend(accUser + " " + accPw + " PTC None");
                     break;
                 case Standard:
                     PalletTown.outputAppend(accUser+","+accPw);
