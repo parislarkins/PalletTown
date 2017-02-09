@@ -183,7 +183,7 @@ class AccountCreator implements Runnable{
 
                 if(proxy.contains("@") && proxy.substring(0,proxy.indexOf("@")).contains(":")){
                     proxyIP = proxy.substring(proxy.indexOf("@") + 1);
-                    proxyAuth = proxy.substring(proxy.indexOf("://"),proxy.indexOf("@"));
+                    proxyAuth = proxy.substring(proxy.indexOf("://")+3,proxy.indexOf("@"));
                     proxies.add(new PTCProxy(proxyIP, proxyAuth));
                     Log("Testing of user:pass proxies not implemented yet, adding to list anyway");
                 }else{
