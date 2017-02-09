@@ -18,7 +18,7 @@ import static pallettown.GUI.Log;
  */
 public class PalletTown implements Runnable {
 
-    public static final double VERSION = 1.45;
+    public static final double VERSION = 1.5;
 
     public static String plusMail;
     public static String userName;
@@ -38,6 +38,8 @@ public class PalletTown implements Runnable {
     public static int resetTime = 960000;
     public static OutputFormat outputFormat = OutputFormat.RocketMap;
     public static boolean useNullProxy = true;
+    public static boolean privateDomain = false;
+
     private static final File settingsFile = new File("pallettown.config");
 
     public static boolean changedProxies = true;
@@ -249,6 +251,9 @@ public class PalletTown implements Runnable {
 
         CheckBox debugMode = (CheckBox) advancedVb.getChildren().get(5);
         debug = debugMode.isSelected();
+
+        CheckBox usePrivateDomain = (CheckBox) advancedVb.getChildren().get(6);
+        privateDomain = usePrivateDomain.isSelected();
     }
 
     public static void loadSettings(){
@@ -330,6 +335,9 @@ public class PalletTown implements Runnable {
                     case "useNullProxy":
                         useNullProxy = Boolean.parseBoolean(value);
                         break;
+                    case "privateDomain":
+                        privateDomain = Boolean.parseBoolean(value);
+                        break;
                 }
 
             }
@@ -389,6 +397,8 @@ public class PalletTown implements Runnable {
             bw.write("outputFormat:"+outputFormat);
             bw.newLine();
             bw.write("useNullProxy:"+useNullProxy);
+            bw.newLine();
+            bw.write("privateDomain:"+privateDomain);
             bw.newLine();
             bw.flush();
             bw.close();

@@ -167,6 +167,8 @@ class AccountCreator implements Runnable{
             return;
         }
 
+        ArrayList<String[]> proxyInfo = new ArrayList<>();
+
         try {
             Scanner in = new Scanner(PalletTown.proxyFile);
 
@@ -185,18 +187,21 @@ class AccountCreator implements Runnable{
                     proxyIP = proxy.substring(proxy.indexOf("@") + 1);
                     proxyAuth = proxy.substring(proxy.indexOf("://"),proxy.indexOf("@"));
                     proxies.add(new PTCProxy(proxyIP, proxyAuth));
-                    Log("Testing of user:pass proxies not implemented yet, adding to list anyway");
+                    Log("Testing of user:pass proxies not implemented yet");
                 }else{
-                    if(ProxyTester.testProxy(proxyIP,proxyAuth)) {
-                        Log("Adding " + proxy + " to list");
-                        proxies.add(new PTCProxy(proxy, proxyAuth));
-                    }
-                    else
-                        Log(proxy + " failed test, not adding");
+                    Log("Adding proxy to test queue");
+                    proxyInfo.add(new String[] {proxyIP,proxyAuth});
                 }
             }
 
+            ArrayList<String[]> validProxies = ProxyTester.testProxies(proxyInfo);
+
+            for (String[] proxy : validProxies) {
+                proxies.add(new PTCProxy(proxy[0],proxy[1]));
+            }
+
             if(PalletTown.useNullProxy) proxies.add(new PTCProxy("null", "IP"));
+
         } catch (FileNotFoundException e) {
             Log("Invalid proxy file");
         }
@@ -275,7 +280,12 @@ class AccountCreator implements Runnable{
             accPw = password;
         }
 
-        String accMail = plusMail.replace("@","+" + accUser + "@");
+        String accMail;
+
+        if(!PalletTown.privateDomain)
+            accMail = plusMail.replace("@","+" + accUser + "@");
+        else
+            accMail = plusMail.replace("@",accUser + "@");
 
         Log("  Username: " + accUser);
         Log("  Password: " + accPw);
@@ -295,7 +305,7 @@ class AccountCreator implements Runnable{
                     PalletTown.outputAppend("ptc," + accUser+","+accPw);
                     break;
                 case PokeAlert:
-                    PalletTown.outputAppend(accUser + " " + password + " PTC None");
+                    PalletTown.outputAppend(accUser + " " + accPw + " PTC None");
                     break;
                 case Standard:
                     PalletTown.outputAppend(accUser+","+accPw);

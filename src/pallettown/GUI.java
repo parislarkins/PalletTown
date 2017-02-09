@@ -811,6 +811,10 @@ public class GUI extends Application{
         debugBox.setSelected(debug);
         vb.getChildren().add(debugBox);
 
+        CheckBox usePrivateDomain = new CheckBox("Use private email domain (username@domain.com)");
+        usePrivateDomain.setSelected(privateDomain);
+        vb.getChildren().addAll(usePrivateDomain);
+
         TextArea textArea = new TextArea();
         textArea.setEditable(false);
         textArea.setPrefHeight(500);
