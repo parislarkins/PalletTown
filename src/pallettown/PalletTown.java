@@ -19,7 +19,7 @@ import static pallettown.GUI.Log;
  */
 public class PalletTown implements Runnable {
 
-    public static final double VERSION = 1.47;
+    public static final double VERSION = 1.48;
 
     public static String plusMail;
     public static String userName;
@@ -36,7 +36,7 @@ public class PalletTown implements Runnable {
     public static boolean debug = false;
     public static int threads = 5;
     public static int delay = 5000;
-    public static int resetTime = 960000;
+    public static int resetTime = 16;
     public static OutputFormat outputFormat = OutputFormat.RocketMap;
     public static boolean useNullProxy = true;
     public static boolean privateDomain = false;
@@ -241,7 +241,7 @@ public class PalletTown implements Runnable {
 
         HBox resetBox = (HBox) advancedVb.getChildren().get(2);
         TextField resetNum = (TextField) resetBox.getChildren().get(1);
-        resetTime = resetNum.getText().equals("") ? 72000 : Integer.parseInt(resetNum.getText());
+        resetTime = resetNum.getText().equals("") ? 16 * 60000 : Integer.parseInt(resetNum.getText()) * 60000;
 
         ComboBox<OutputFormat> outputFormatBox = (ComboBox<OutputFormat>) advancedVb.getChildren().get(3);
         outputFormat = outputFormatBox.getValue();
@@ -327,7 +327,7 @@ public class PalletTown implements Runnable {
                         delay = value.equals("null") ? 500 : Integer.parseInt(value);
                         break;
                     case "resetTime":
-                        resetTime = value.equals("null") ? 78000 : Integer.parseInt(value);
+                        resetTime = value.equals("null") ? 16 : Integer.parseInt(value) / 60000;
                         break;
                     case "outputFormat":
                         outputFormat = OutputFormat.valueOf(value);
