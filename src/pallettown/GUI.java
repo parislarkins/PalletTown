@@ -234,12 +234,20 @@ public class GUI extends Application{
                     "    \n" +
                     "    proxyType = ''\n" +
                     "\n" +
-                    "    if(proxyType.startswith('https')):\n" +
+                    "    if(proxy.startswith('https')):\n" +
                     "        proxyType = 'https'\n" +
-                    "    elif(proxyType.startswith('http')):\n" +
+                    "        proxy = proxy[8:]\n" +
+                    "    elif(proxy.startswith('http')):\n" +
                     "        proxyType = 'http'\n" +
-                    "    if(proxyType.startswith('socks5')):\n" +
+                    "        proxy = proxy[7:]\n" +
+                    "    elif(proxy.startswith('socks5')):\n" +
                     "        proxyType = 'socks5'\n" +
+                    "        proxy = proxy[8:]\n" +
+                    "    elif(proxy.startswith('socks4')):\n" +
+                    "        proxy = proxy[8:]\n" +
+                    "        proxyType = 'socks4'\n" +
+                    "\n" +
+                    "    log(threadname,\"Proxy type: \" + proxyType)\n" +
                     "\n" +
                     "    if(captchakey2 == \"null\"):\n" +
                     "        captchakey2 = None\n" +
@@ -300,6 +308,7 @@ public class GUI extends Application{
                     "\n" +
                     "    except Exception as e:\n" +
                     "        log(threadname, \"unknown Error verifying age, terminating\")\n" +
+                    "        log(threadname, driver.current_url)\n"+
                     "        driver.close()\n" +
                     "        driver.quit()\n" +
                     "        raise e\n" +

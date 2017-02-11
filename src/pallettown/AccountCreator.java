@@ -173,21 +173,29 @@ class AccountCreator implements Runnable{
             while (in.hasNext()) {
                 String proxy = in.nextLine();
 
-                if(!proxy.startsWith("http") && !proxy.startsWith("socks5")){
+                if(!proxy.startsWith("http") && !proxy.startsWith("socks")){
                     proxy = "https://"+proxy;
                 }
 
+                int doubleSlashIndex = proxy.indexOf("://");
 
-                String proxyIP = proxy.substring(proxy.indexOf("://") + 3);
+                String protocol = proxy.substring(0,doubleSlashIndex + 3);
+
+                String proxyIP = proxy.substring(doubleSlashIndex + 3);
                 String proxyAuth = "IP";
 
                 if(proxy.contains("@") && proxy.substring(0,proxy.indexOf("@")).contains(":")){
-                    proxyIP = proxy.substring(proxy.indexOf("@") + 1);
-                    proxyAuth = proxy.substring(proxy.indexOf("://")+3,proxy.indexOf("@"));
+                    proxyIP = protocol + proxy.substring(proxy.indexOf("@") + 1);
+                    proxyAuth = proxy.substring(doubleSlashIndex+3,proxy.indexOf("@"));
                     proxies.add(new PTCProxy(proxyIP, proxyAuth));
                     Log("Testing of user:pass proxies not implemented yet, adding to list anyway");
                 }else{
-                    if(ProxyTester.testProxy(proxyIP,proxyAuth)) {
+                    if(protocol.startsWith("socks")) {
+                        Log("Testing of socks proxies not implemented yet, adding to list anyway");
+                        Log("Adding " + proxy + " to list");
+                        proxies.add(new PTCProxy(proxy, proxyAuth));
+                    }
+                    else if(ProxyTester.testProxy(proxyIP,proxyAuth)) {
                         Log("Adding " + proxy + " to list");
                         proxies.add(new PTCProxy(proxy, proxyAuth));
                     }
