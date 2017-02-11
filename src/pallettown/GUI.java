@@ -242,9 +242,9 @@ public class GUI extends Application{
                     "        proxy = proxy[7:]\n" +
                     "    elif(proxy.startswith('socks5')):\n" +
                     "        proxyType = 'socks5'\n" +
-                    "        proxy = proxy[8:]\n" +
+                    "        proxy = proxy[9:]\n" +
                     "    elif(proxy.startswith('socks4')):\n" +
-                    "        proxy = proxy[8:]\n" +
+                    "        proxy = proxy[9:]\n" +
                     "        proxyType = 'socks4'\n" +
                     "\n" +
                     "    log(threadname,\"Proxy type: \" + proxyType)\n" +
@@ -562,6 +562,7 @@ public class GUI extends Application{
         final TextField avMailText = new TextField(avMail);
         avMailText.setPromptText("Email account for auto verification");
         avMailText.setPrefWidth(350);
+        avMailText.setOnKeyTyped(event -> autoVerifyBox.setSelected(true));
 
         HBox av = new HBox();
         av.setAlignment(Pos.CENTER_RIGHT);
@@ -575,6 +576,7 @@ public class GUI extends Application{
         final TextField avPassText = new TextField(avPass);
         avPassText.setPromptText("Email account password for auto verification");
         avPassText.setPrefWidth(350);
+        avPassText.setOnKeyTyped(event -> autoVerifyBox.setSelected(true));
 
         HBox avPw = new HBox();
         avPw.setAlignment(Pos.CENTER_RIGHT);
@@ -754,9 +756,20 @@ public class GUI extends Application{
             advancedStage = new Stage();
             advancedStage.setTitle("Advanced Settings");
             advancedStage.setScene(advancedScene);
+
+            advancedStage.show();
+            advancedStage.setX(primaryStage.getX() + primaryStage.getWidth() + 5);
+            advancedStage.setY(primaryStage.getY());
         }
 
-        advancedStage.show();
+        if(advancedStage.isShowing()){
+            advancedStage.requestFocus();
+        }else{
+            advancedStage.show();
+            advancedStage.setX(primaryStage.getX() + primaryStage.getWidth() + 5);
+            advancedStage.setY(primaryStage.getY());
+        }
+
     }
 
     private void makeAdvancedControls() {
@@ -776,7 +789,7 @@ public class GUI extends Application{
         threadsText.setPrefWidth(50);
 
         HBox thrds = new HBox();
-        thrds.setAlignment(Pos.CENTER_RIGHT);
+        thrds.setAlignment(Pos.CENTER);
         thrds.getChildren().addAll(threadsLabel,threadsText);
         thrds.setSpacing(10);
 
@@ -785,22 +798,22 @@ public class GUI extends Application{
         Label delayLabel = new Label("Delay between accounts (ms):");
 
         final TextField delayText = new TextField(Integer.toString(delay));
-        delayText.setPrefWidth(80);
+        delayText.setPrefWidth(50);
 
         HBox del = new HBox();
-        del.setAlignment(Pos.CENTER_RIGHT);
+        del.setAlignment(Pos.CENTER);
         del.getChildren().addAll(delayLabel,delayText);
         del.setSpacing(10);
 
         vb.getChildren().add(del);
 
-        Label resetLabel = new Label("Proxy reset time (ms):");
+        Label resetLabel = new Label("Proxy reset time (minutes):");
 
         final TextField resetText = new TextField(Integer.toString(resetTime));
-        resetText.setPrefWidth(80);
+        resetText.setPrefWidth(50);
 
         HBox reset = new HBox();
-        reset.setAlignment(Pos.CENTER_RIGHT);
+        reset.setAlignment(Pos.CENTER);
         reset.getChildren().addAll(resetLabel,resetText);
         reset.setSpacing(10);
 

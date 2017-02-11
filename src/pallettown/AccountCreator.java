@@ -28,7 +28,7 @@ class AccountCreator implements Runnable{
 
     private static int WORK_ITEMS;
 
-    private int accNum = 0;
+    private int accNum = 1;
 
     static int success = 0;
 
@@ -220,7 +220,7 @@ class AccountCreator implements Runnable{
         GUI.addThread(accountThread);
 
         int accNum;
-        while ((accNum = incAccNum()) < WORK_ITEMS) {
+        while ((accNum = incAccNum()) <= WORK_ITEMS) {
             Log(Thread.currentThread().getName()+" making account "+ accNum);
             accountThread.LogMessage("making account " + accNum);
 
@@ -259,7 +259,7 @@ class AccountCreator implements Runnable{
     private static boolean createAccount(int accNum, String name, PTCProxy proxy) {
         String birthday = RandomDetails.randomBirthday();
 
-        Log("Making account #" + (accNum+1));
+        Log("Making account #" + (accNum));
 
         String accUser;
 
@@ -268,9 +268,9 @@ class AccountCreator implements Runnable{
             accUser = RandomDetails.randomUsername();
         }else{
             if(PalletTown.count > 1 && PalletTown.startNum == null)
-                accUser = PalletTown.userName + (accNum+1);
+                accUser = PalletTown.userName + (accNum);
             else if (PalletTown.count >= 1 && PalletTown.startNum != null)
-                accUser = PalletTown.userName + (PalletTown.startNum + accNum);
+                accUser = PalletTown.userName + (PalletTown.startNum + accNum-1);
             else
                 accUser = PalletTown.userName;
         }
