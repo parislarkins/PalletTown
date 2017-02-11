@@ -155,6 +155,8 @@ Starting it from terminal with:
 
 Or simply double clicking the .jar file in a file manager.
 
+You can find the .jar file here [Releases](https://github.com/novskey/PalletTown/releases)
+
 Starting it from terminal will give you a log of what's happening in the program to let you know it's still running or if anything goes wrong.
 Currently without running it from terminal the program will just freeze until it has completed account creation.
 
@@ -174,6 +176,8 @@ Detailed instructions not written yet, however, if you install the following dep
 Either double click on the Jar, or run through terminal with:
 
 `java -jar PalletTown.jar`
+
+You can find the .jar file here [Releases](https://github.com/novskey/PalletTown/releases)
 
 ## <a name="usage"></a> Usage
 
