@@ -18,7 +18,18 @@ public class HttpCreatorTest{
 
         client = HttpClients.createDefault();
 
-        HttpCreator.GetCsrfTasl(new Account("5-6-1991","mynovskey","J@kolantern7"),client);
+        Account account = new Account("5-6-1991","mynovskey","J@kolantern7","miminpari+mynovskey@hotmail.com","Australia");
+        HttpCreator.GetCsrfTask(account,client);
+
+        System.out.println(account.Csrf);
+
+        System.out.println(HttpCreator.AgeVerifyTask(account,client).Success);
+
+        System.out.println(HttpCreator.ProfileSettingsTask(account,client).Success);
+
+        PalletTown.captchaKey = "5d579f38e793dc5b3d4905540a4215fa";
+        System.out.println(HttpCreator.StartSolveCaptchaTask(account,client, "138.128.66.121:21260", "http").Success);
+
     }
 
 }

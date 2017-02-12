@@ -9,11 +9,17 @@ public class Account {
     String user;
     String pass;
     public String Csrf;
+    public String Country;
+    public String CaptchaId;
+    public String CaptchaResponse;
+    public String email;
 
-    public Account(String dob, String user, String pass){
+    public Account(String dob, String user, String pass, String email, String country){
         this.dob = dob;
         this.user = user;
         this.pass = pass;
+        this.email = email;
+        this.Country = country;
     }
 
 }
