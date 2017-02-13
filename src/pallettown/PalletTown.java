@@ -25,7 +25,7 @@ public class PalletTown implements Runnable {
     public static String password;
     public static Integer startNum;
     public static int count;
-    public static String captchaKey;
+    public static String captchaKey = "";
     public static boolean autoVerify;
     public static String avMail;
     public static String avPass;
