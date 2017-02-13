@@ -156,13 +156,14 @@ public class HttpCreator {
 
         final String[] responseString = new String[1];
 
-        new Thread(() -> {
+//        new Thread(() -> {
             HttpURLConnection connection = null;
 
             try {
                 URL url = new URL(address);
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
+                connection.setDoOutput(true);
 
                 byte[] data = post.getBytes(StandardCharsets.US_ASCII);
                 connection.setFixedLengthStreamingMode(data.length);
@@ -190,7 +191,7 @@ public class HttpCreator {
                     connection.disconnect();
                 }
             }
-        });
+//        });
 
         return responseString[0];
     }
