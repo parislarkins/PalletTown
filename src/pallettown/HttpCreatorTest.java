@@ -30,7 +30,8 @@ public class HttpCreatorTest{
         }
 
 
-        PalletTown.captchaKey = "5d579f38e793dc5b3d4905540a4215fa";
+        // Captcha Key Here
+        PalletTown.captchaKey = ;
 
         account.CaptchaResponse = HttpCreator.solveCaptcha(PalletTown.captchaKey,HttpCreator.RECAPTCHA_SITEKEY, HttpCreator.SIGNUP_URL);
 
