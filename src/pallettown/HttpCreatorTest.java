@@ -23,16 +23,18 @@ public class HttpCreatorTest{
 
         System.out.println(account.Csrf);
 
-        System.out.println(HttpCreator.AgeVerifyTask(account,client).Success);
+        if((HttpCreator.AgeVerifyTask(account,client).Success)){
+            System.out.println("True");
+        }else{
+            return;
+        }
 
 
         PalletTown.captchaKey = "5d579f38e793dc5b3d4905540a4215fa";
-        System.out.println(HttpCreator.StartSolveCaptchaTask(account,client, "138.128.66.121:21260", "http").Success);
 
-        System.out.println(HttpCreator.GetSolvedCaptchaTask(account).Success);
+        account.CaptchaResponse = HttpCreator.solveCaptcha(PalletTown.captchaKey,HttpCreator.RECAPTCHA_SITEKEY, HttpCreator.SIGNUP_URL);
 
         System.out.println(HttpCreator.ProfileSettingsTask(account,client).Success);
-
 
     }
 
