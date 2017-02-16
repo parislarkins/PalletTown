@@ -24,7 +24,7 @@ Bitcoin address for donations: 1MsCrydzrKQ8L6NYJTLuVPGMwCjLBtMFP2
 - [Python 2.7.12+](https://www.python.org/ftp/python/2.7.13/python-2.7.13.msi)
 - [Selenium](http://selenium-python.readthedocs.io/installation.html)
 - [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/downloads)
-- [PhantomJS (For 2captcha creation)](http://selenium-python.readthedocs.io/installation.html)
+- [PhantomJS (For 2captcha creation)](http://phantomjs.org/download.html)
 
 ## <a name="install-guides"></a> Installation Guides
 
