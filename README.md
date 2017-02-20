@@ -83,9 +83,10 @@ Starting it from cmd.exe with:
 
 Or simply double clicking the .jar file in Windows Explorer.
 
-Starting it from cmd.exe will give you a log of what's happening in the program to let you know it's still running or if anything goes wrong.
-Currently without running it from cmd.exe the program will just freeze until it has completed account creation.
+You can find the .jar file here [Releases](https://github.com/novskey/PalletTown/releases)
 
+If you click the advanced settings button a new window will open which contains a live log.
+Additionally, a pallettown.log file is created in the same directory as the .jar with detailed logging of the account creation process.
 ###<a name="linux-install"></a> Linux
 
 Tested on Ubuntu 16.04
@@ -157,8 +158,8 @@ Or simply double clicking the .jar file in a file manager.
 
 You can find the .jar file here [Releases](https://github.com/novskey/PalletTown/releases)
 
-Starting it from terminal will give you a log of what's happening in the program to let you know it's still running or if anything goes wrong.
-Currently without running it from terminal the program will just freeze until it has completed account creation.
+If you click the advanced settings button a new window will open which contains a live log.
+Additionally, a pallettown.log file is created in the same directory as the .jar with detailed logging of the account creation process.
 
 ### <a name="mac-install"></a> Mac
 
@@ -178,6 +179,9 @@ Either double click on the Jar, or run through terminal with:
 `java -jar PalletTown.jar`
 
 You can find the .jar file here [Releases](https://github.com/novskey/PalletTown/releases)
+
+If you click the advanced settings button a new window will open which contains a live log.
+Additionally, a pallettown.log file is created in the same directory as the .jar with detailed logging of the account creation process.
 
 ## <a name="usage"></a> Usage
 
@@ -240,6 +244,7 @@ All you have to do is wait for the captcha to appear, and solve it.
     Start number 10, 5 accounts:
     user10,user11,user12,user13,user14
     ```
+  For more info on proxies see the FAQ [here](faq-proxy-types)
 - Click the Output File field, which will open up a file browser (It may take a while on some systems)
 - Select your output file
 - Click Create Accounts
@@ -249,12 +254,11 @@ All you have to do is wait for the captcha to appear, and solve it.
 #### Create 10 accounts with random details, using 2Captcha, automatic Gmail verification, save to file, and use proxy list
 
 - Enter a plusmail compatible email address in the Email field. (See [the FAQ](#faq-plusmail) if you're unsure)
-  **Note: The email address you enter here must be setup to forward/redirect to the Gmail account you intend to use. See [here](#hotmail-forwarding) for how to set it up.**
 - Enter the number 10 into the Number of accounts field.
 - Enter your 2Captcha key into the 2Captcha Key field.
 - Check the Auto Verify Accounts box.
 - Enter your email account for auto verify. (eg: myaddress@hotmail.com, or mygmail@gmail.com if you've set up forwarding to gmail)
-- Enter your Gmail account password.
+- Enter your email account password.
 - Click the Output File field, which will open up a file browser (It may take a while on some systems)
 - Select your output file
 - Click the Proxy File field, which will open a file browser (It may take a while on some systems)
@@ -265,6 +269,7 @@ All you have to do is wait for the captcha to appear, and solve it.
     11.52.231.136:23321
     https://username:password@12.13.145.251:21313
     ```
+  For more info on proxies see the FAQ [here](faq-proxy-types)
 - Click Create Accounts
 
 ![Create 10 accounts with random details, using 2Captcha, automatic verification, save to file, and use proxy list](images/10-random-2captcha-gmailav-proxies-save.jpg)
@@ -272,6 +277,16 @@ All you have to do is wait for the captcha to appear, and solve it.
 ## <a name="faq"></a> FAQ
 
 For more help, please ask on the [discord](https://discord.gg/RgWSqyU).
+
+#### <a name="faq-proxy-types"></a> What proxy types are supported?
+PalletTown currently supports the following proxy protocols:
+
+- HTTP/HTTPS
+- SOCKS4/SOCKS5
+
+#### <a name="faq-proxy-sources"></a> Where can I find proxies to use with PalletTown?
+PalletTown works best with private proxies. Public proxies often have unstable connections, and can even be banned by Niantic.
+For best results, google "private proxies".
 
 #### <a name="faq-plusmail"></a> What is a "plusmail compatible email address"?
 

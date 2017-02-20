@@ -59,11 +59,17 @@ public class PTCProxy {
         System.out.println("checking if proxy is usable");
 
         if(usages < MAX_USES && startTimes == null) return true;
-        long millis = System.currentTimeMillis() - startTimes.get(0);
+        try {
+            long millis = System.currentTimeMillis() - startTimes.get(0);
 //        long millis = System.currentTimeMillis() - latestTime;
-        String time = PalletTown.millisToTime(millis);
-        System.out.println("proxy running time: " + time + ", usages: " + usages);
-        return (millis < RESET_TIME && usages < MAX_USES);
+            String time = PalletTown.millisToTime(millis);
+            System.out.println("proxy running time: " + time + ", usages: " + usages);
+            return (millis < RESET_TIME && usages < MAX_USES);
+        }catch (NullPointerException e){
+            System.out.println("NPE");
+        }
+
+        return false;
     }
 
     public String IP(){

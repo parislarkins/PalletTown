@@ -18,7 +18,7 @@ import static pallettown.GUI.Log;
  */
 public class PalletTown implements Runnable {
 
-    public static final double VERSION = 1.48;
+    public static final double VERSION = 1.482;
 
     public static String plusMail;
     public static String userName;
@@ -39,6 +39,7 @@ public class PalletTown implements Runnable {
     public static OutputFormat outputFormat = OutputFormat.RocketMap;
     public static boolean useNullProxy = true;
     public static boolean privateDomain = false;
+    public static String trashName = "Trash";
     private static final File settingsFile = new File("pallettown.config");
 
     public static boolean changedProxies = true;
@@ -242,17 +243,24 @@ public class PalletTown implements Runnable {
         TextField resetNum = (TextField) resetBox.getChildren().get(1);
         resetTime = resetNum.getText().equals("") ? 16 * 60000 : Integer.parseInt(resetNum.getText()) * 60000;
 
-        ComboBox<OutputFormat> outputFormatBox = (ComboBox<OutputFormat>) advancedVb.getChildren().get(3);
+
+        HBox trashBox = (HBox) advancedVb.getChildren().get(3);
+        TextField trashField = (TextField) trashBox.getChildren().get(1);
+        trashName = trashField.getText().equals("") ? "Trash" : trashField.getText();
+
+        ComboBox<OutputFormat> outputFormatBox = (ComboBox<OutputFormat>) advancedVb.getChildren().get(4);
         outputFormat = outputFormatBox.getValue();
 
-        CheckBox useMyIP = (CheckBox) advancedVb.getChildren().get(4);
+        CheckBox useMyIP = (CheckBox) advancedVb.getChildren().get(5);
         useNullProxy = useMyIP.isSelected();
 
-        CheckBox debugMode = (CheckBox) advancedVb.getChildren().get(5);
+        CheckBox debugMode = (CheckBox) advancedVb.getChildren().get(6);
         debug = debugMode.isSelected();
 
-        CheckBox usePrivateDomain = (CheckBox) advancedVb.getChildren().get(6);
+        CheckBox usePrivateDomain = (CheckBox) advancedVb.getChildren().get(7);
         privateDomain = usePrivateDomain.isSelected();
+
+
     }
 
     public static void loadSettings(){
@@ -337,6 +345,9 @@ public class PalletTown implements Runnable {
                     case "privateDomain":
                         privateDomain = Boolean.parseBoolean(value);
                         break;
+                    case "trashName":
+                        trashName = value.equals("null") ? "Trash" : value;
+                        break;
                 }
 
             }
@@ -398,6 +409,8 @@ public class PalletTown implements Runnable {
             bw.write("useNullProxy:"+useNullProxy);
             bw.newLine();
             bw.write("privateDomain:"+privateDomain);
+            bw.newLine();
+            bw.write("trashName:"+trashName);
             bw.newLine();
             bw.flush();
             bw.close();

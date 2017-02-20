@@ -54,11 +54,10 @@ class EmailVerifier {
             inbox.open(Folder.READ_WRITE);
 
             if (host.equals(GMAIL_HOST))
-                trash = store.getFolder("[Gmail]/Trash");
+                trash = store.getFolder("[Gmail]/" + PalletTown.trashName);
             else
                 trash = store.getFolder("Deleted");
             trash.open(Folder.READ_WRITE);
-
 
             Log("logged in to: " + email);
 

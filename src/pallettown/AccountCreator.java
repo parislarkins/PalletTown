@@ -66,7 +66,7 @@ class AccountCreator implements Runnable{
         if(PalletTown.captchaKey.equals("")){
             Log("manual captcha");
 
-            for (int i = 0; i < PalletTown.count; i++) {
+            for (int i = 1; i <= PalletTown.count; i++) {
                 PTCProxy proxy = getProxy();
                 createAccount(i, Thread.currentThread().getName(), proxy);
                 proxy.Use();
@@ -233,13 +233,13 @@ class AccountCreator implements Runnable{
             }else{
                 accountThread.Failure();
             }
-            proxy.Use();
             mytaskcount++;
             try {
                 Thread.sleep(PalletTown.delay);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            proxy.Use();
         }
 
         Log(Thread.currentThread().getName()+" did "+mytaskcount+ " tasks");
@@ -270,7 +270,7 @@ class AccountCreator implements Runnable{
             if(PalletTown.count > 1 && PalletTown.startNum == null)
                 accUser = PalletTown.userName + (accNum);
             else if (PalletTown.count >= 1 && PalletTown.startNum != null)
-                accUser = PalletTown.userName + (PalletTown.startNum + accNum-1);
+                accUser = PalletTown.userName + (PalletTown.startNum + accNum);
             else
                 accUser = PalletTown.userName;
         }

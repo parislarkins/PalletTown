@@ -819,6 +819,19 @@ public class GUI extends Application{
 
         vb.getChildren().add(reset);
 
+        Label trashLabel = new Label("Gmail trash folder name: ");
+
+        final TextField trashNameField = new TextField(trashName);
+
+        trashNameField.setPrefWidth(65);
+
+        HBox trash = new HBox();
+        trash.setAlignment(Pos.CENTER);
+        trash.getChildren().addAll(trashLabel,trashNameField);
+        trash.setSpacing(10);
+
+        vb.getChildren().add(trash);
+
 //        CheckBox outputFormat = new CheckBox("RocketMap output formatting");
 //        outputFormat.setSelected();
         ComboBox<OutputFormat> outputFormatComboBox = new ComboBox<>(FXCollections.observableArrayList(OutputFormat.values()));
@@ -836,6 +849,8 @@ public class GUI extends Application{
         CheckBox usePrivateDomain = new CheckBox("Use private email domain (username@domain.com)");
         usePrivateDomain.setSelected(privateDomain);
         vb.getChildren().addAll(usePrivateDomain);
+
+
 
         TextArea textArea = new TextArea();
         textArea.setEditable(false);
