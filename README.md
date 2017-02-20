@@ -4,6 +4,8 @@ Pallet Town is a Java tool for creating Pokemon Trainer Club accounts, based on 
 
 You can download the latest release [here](https://github.com/novskey/PalletTown/releases) (Just download the .jar file) 
 
+Bitcoin address for donations: 1MsCrydzrKQ8L6NYJTLuVPGMwCjLBtMFP2
+
 1. [Installation Guides](#install-guides)
     1. [Windows Installation](#windows-install)
     2. [Linux Installation](#linux-install)
@@ -22,7 +24,7 @@ You can download the latest release [here](https://github.com/novskey/PalletTown
 - [Python 2.7.12+](https://www.python.org/ftp/python/2.7.13/python-2.7.13.msi)
 - [Selenium](http://selenium-python.readthedocs.io/installation.html)
 - [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/downloads)
-- [PhantomJS (For 2captcha creation)](http://selenium-python.readthedocs.io/installation.html)
+- [PhantomJS (For 2captcha creation)](http://phantomjs.org/download.html)
 
 ## <a name="install-guides"></a> Installation Guides
 
