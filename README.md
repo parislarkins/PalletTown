@@ -246,7 +246,7 @@ All you have to do is wait for the captcha to appear, and solve it.
     Start number 10, 5 accounts:
     user10,user11,user12,user13,user14
     ```
-  For more info on proxies see the FAQ [here](faq-proxy-types)
+  For more info on proxies see the FAQ [here](#faq-proxy-types)
 - Click the Output File field, which will open up a file browser (It may take a while on some systems)
 - Select your output file
 - Click Create Accounts
@@ -271,7 +271,7 @@ All you have to do is wait for the captcha to appear, and solve it.
     11.52.231.136:23321
     https://username:password@12.13.145.251:21313
     ```
-  For more info on proxies see the FAQ [here](faq-proxy-types)
+  For more info on proxies see the FAQ [here](#faq-proxy-types)
 - Click Create Accounts
 
 ![Create 10 accounts with random details, using 2Captcha, automatic verification, save to file, and use proxy list](images/10-random-2captcha-gmailav-proxies-save.jpg)
