@@ -28,10 +28,6 @@ class EmailVerifier {
 
     private static final Flags deleted = new Flags(Flags.Flag.DELETED);
 
-    public static void main(String[] args) {
-        verify("pallettown@zoho.com", "jakolantern7", 1, 1);
-    }
-
     public static void verify(String email, String emailPass, int accounts, int retries) {
 
         String host;
