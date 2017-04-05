@@ -98,11 +98,13 @@ public class PalletTown implements Runnable {
         if(autoVerify && !avMail.equals("") && !avPass.equals("")){
             Log("Account Creation done");
 
-            Log("Waiting 4 minutes to verify emails");
-            try {
-                Thread.sleep(240000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (avMail.contains("@gmail.")) {
+                Log("Waiting 4 minutes to verify emails");
+                try {
+                    Thread.sleep(240000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
 //            EmailVerifier.delayedVerify(avMail, avPass, AccountCreator.success,5);
@@ -157,8 +159,8 @@ public class PalletTown implements Runnable {
         if((startNum == null || startNum == 0) && count > 1 && userName != null)
             return "To create more than 1 account, specify a start number";
 
-        if(autoVerify && (avMail.equals("") || avPass.equals("") || (!avMail.contains("@gmail.com") && !avMail.contains("@hotmail."))))
-            return "Check auto verify account/password are correct (Use hotmail or gmail)";
+        if (autoVerify && (avMail.equals("") || avPass.equals("") || (!avMail.contains("@gmail.com") && !avMail.contains("@hotmail.") && !avMail.contains("@zoho."))))
+            return "Check auto verify account/password are correct (Use hotmail, gmail or zoho)";
 
         return "valid";
     }

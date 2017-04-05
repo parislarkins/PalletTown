@@ -100,7 +100,7 @@ public class GUI extends Application{
                     "# from pikaptcha.jibber import *\n" +
                     "# from pikaptcha.ptcexceptions import *\n" +
                     "# from pikaptcha.url import *\n" +
-                    "\n" +
+                    "from cgi import escape\n" +
                     "user_agent = (\n" +
                     "    \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) \" + \"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.57 Safari/537.36\")\n" +
                     "\n" +
@@ -308,7 +308,7 @@ public class GUI extends Application{
                     "\n" +
                     "    except Exception as e:\n" +
                     "        log(threadname, \"unknown Error verifying age, terminating\")\n" +
-                    "        log(threadname, driver.current_url)\n"+
+                    "        log(threadname, driver.current_url)\n" +
                     "        driver.close()\n" +
                     "        driver.quit()\n" +
                     "        raise e\n" +
@@ -384,20 +384,20 @@ public class GUI extends Application{
                     "            driver.quit()\n" +
                     "            return False\n" +
                     "    else:\n" +
-                    "        # Now to automatically handle captcha\n" +
+                    "#         # Now to automatically handle captcha\n" +
                     "        log(threadname,\"Starting autosolve recaptcha\")\n" +
                     "        html_source = driver.page_source\n" +
                     "\n" +
                     "        gkey_index = html_source.find(\"https://www.google.com/recaptcha/api2/anchor?k=\") + 47\n" +
                     "        gkey = html_source[gkey_index:gkey_index + 40]\n" +
                     "        recaptcharesponse = \"Failed\"\n" +
-                    "        url=\"http://club.pokemon.com\"\n" +
+                    "        url=escape(driver.current_url)\n" +
                     "        while (recaptcharesponse == \"Failed\"):\n" +
-                    "            recaptcharesponse = openurl(\"http://2captcha.com/in.php?key=\" + captchakey2 + \"&method=userrecaptcha&googlekey=\" + gkey)\n" +
-                    "            # \"http://2captcha.com/in.php?key={}&method=userrecaptcha&googlekey={}&pageurl={}\".format(captchakey2,gkey,url)\n" +
+                    "            recaptcharesponse = openurl(\"http://2captcha.com/in.php?key={}&method=userrecaptcha&googlekey={}&pageurl={}\".format(captchakey2,gkey,url))\n" +
                     "        captchaid = recaptcharesponse[3:]\n" +
                     "        recaptcharesponse = \"CAPCHA_NOT_READY\"\n" +
                     "        elem = driver.find_element_by_class_name(\"g-recaptcha\")\n" +
+                    "\n" +
                     "        log(threadname,\"We will wait 10 seconds for captcha to be solved by 2captcha\")\n" +
                     "        start_time = int(time.time())\n" +
                     "        timedout = False\n" +

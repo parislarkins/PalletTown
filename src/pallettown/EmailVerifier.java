@@ -21,9 +21,16 @@ class EmailVerifier {
 
     private static final String HOTMAIL_HOST = "imap-mail.outlook.com";
     //    private static final String HOTMAIL_PORT = ""
+
+    private static final String ZOHO_HOST = "imap.zoho.com";
+
     private static Folder inbox;
 
     private static final Flags deleted = new Flags(Flags.Flag.DELETED);
+
+    public static void main(String[] args) {
+        verify("pallettown@zoho.com", "jakolantern7", 1, 1);
+    }
 
     public static void verify(String email, String emailPass, int accounts, int retries) {
 
@@ -35,8 +42,10 @@ class EmailVerifier {
 //            port = "993";
         } else if (email.contains("@hotmail.")) {
             host = HOTMAIL_HOST;
+        } else if (email.contains("@zoho.")) {
+            host = ZOHO_HOST;
         } else {
-            Log("invalid email, please use hotmail or gmail");
+            Log("invalid email, please use hotmail, gmail, or zoho");
             return;
         }
 
@@ -55,8 +64,11 @@ class EmailVerifier {
 
             if (host.equals(GMAIL_HOST))
                 trash = store.getFolder("[Gmail]/" + PalletTown.trashName);
+            else if (host.equals(ZOHO_HOST))
+                trash = store.getFolder("Trash");
             else
                 trash = store.getFolder("Deleted");
+
             trash.open(Folder.READ_WRITE);
 
             Log("logged in to: " + email);
