@@ -18,7 +18,7 @@ import static pallettown.GUI.Log;
  */
 public class PalletTown implements Runnable {
 
-    public static final double VERSION = 1.482;
+    public static final double VERSION = 1.5;
 
     public static String plusMail;
     public static String userName;
@@ -144,8 +144,8 @@ public class PalletTown implements Runnable {
 
     private static String verifySettings() {
 
-        if(plusMail.equals("") || !plusMail.contains("@") || plusMail.contains("gmail.com"))
-            return "Check email is correct and not a gmail address and try again";
+        if (plusMail.equals("") || !plusMail.contains("@") || plusMail.contains("gmail.com") || plusMail.contains("hotmail") || plusMail.contains("outlook"))
+            return "Check email is correct and not a hotmail, outlook, or gmail address and try again";
 
 //        if(userName.equals(""))
 //            return "Please enter a username";

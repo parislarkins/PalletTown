@@ -28,9 +28,10 @@ class EmailVerifier {
 
     private static final Flags deleted = new Flags(Flags.Flag.DELETED);
 
+    static String host;
+
     public static void verify(String email, String emailPass, int accounts, int retries) {
 
-        String host;
 //        String port;
 
         if (email.contains("@gmail.com")) {
@@ -50,8 +51,10 @@ class EmailVerifier {
         mailServerProperties.put("mail.imap.starttls.enable", "true");
         Session getMailSession = Session.getDefaultInstance(mailServerProperties, null);
 
+        Store store = null;
+
         try {
-            Store store = getMailSession.getStore("imaps");
+            store = getMailSession.getStore("imaps");
             store.connect(host, email, emailPass);
 
             // opens the inbox folder
@@ -103,6 +106,14 @@ class EmailVerifier {
             }
         } catch (MessagingException | InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                inbox.close(true);
+                trash.close(true);
+                store.close();
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
         }
 
 
@@ -145,7 +156,9 @@ class EmailVerifier {
 
                     Message[] messageArr = new Message[]{message};
 
-                    inbox.copyMessages(messageArr, trash);
+
+                    if (!host.equals(ZOHO_HOST))
+                        inbox.copyMessages(messageArr, trash);
 
                     inbox.setFlags(messageArr, deleted, true);
 
